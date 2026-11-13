@@ -1,5 +1,5 @@
 /* Meus Treinos: funciona sem internet depois da primeira abertura */
-const VERSION = 'meus-treinos-v3';
+const VERSION = 'meus-treinos-v4';
 const ASSETS = [
   './',
   './index.html',
