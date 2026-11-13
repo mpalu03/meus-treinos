@@ -166,7 +166,7 @@ select.input { padding-right: 6px; }
 
 /* History */
 .sumgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.stat { background: var(--surface-2); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+.stat { background: var(--surface-2); border-radius: 10px; padding: 8px 10px; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 2px; }
 .stat small { display: block; font-size: 11.5px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
 .stat b { font-family: var(--font-display); font-size: 23px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.15; display: block; }
 .hcard { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
@@ -231,7 +231,14 @@ nav.tabs .badge { position: absolute; top: 4px; right: calc(50% - 20px); width: 
 .timer .lbl { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; opacity: .75; }
 .timer .tt { font-family: var(--font-display); font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 54px; }
 .timer button { border: 0; border-radius: 999px; height: 38px; min-width: 38px; padding: 0 12px; background: color-mix(in srgb, var(--bg) 18%, transparent); color: inherit; font-weight: 700; cursor: pointer; }
-.timer.over { background: var(--good); color: #fff; }
+.timer.over { background: var(--good); color: #fff; animation: pulse .7s ease-in-out 4; }
+@keyframes pulse { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.07); } }
+.linkbtn { background: none; border: 0; padding: 2px 0; min-height: 32px; color: var(--accent); font-weight: 600; font-size: 14px; cursor: pointer; align-self: flex-start; text-decoration: underline; text-underline-offset: 3px; }
+.psets { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; }
+.pset { display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--surface-2); border-radius: 12px; padding: 8px 6px 10px; }
+.plbl { font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.cinput.sm { width: 100%; max-width: 96px; height: 42px; font-size: 22px; }
+.pnote { font-size: 12.5px; color: var(--muted); gap: 10px; align-items: flex-end; }
 
 /* Modal + toast */
 .modal { position: fixed; inset: 0; background: rgba(8, 10, 14, .55); display: flex; align-items: flex-end; justify-content: center; z-index: 50; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
@@ -247,7 +254,7 @@ nav.tabs .badge { position: absolute; top: 4px; right: calc(50% - 20px); width: 
   .datef { width: 138px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; scroll-behavior: auto !important; }
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
 </style>
 </head>
@@ -351,6 +358,7 @@ const nfIn = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2, useGroup
 const fmtNum = v => (v == null || Number.isNaN(v)) ? '—' : nf.format(v);
 const unitLabel = u => u === 's' ? 's' : u === 'reps' ? 'reps' : 'kg';
 const fmtCarga = (v, u) => v == null ? '—' : `${nf.format(v)} ${unitLabel(u)}`;
+const fmtSets = arr => arr.map(v => v == null ? '–' : nf.format(v)).join(' / ');
 function parseNum(s) {
   if (s == null) return null;
   let t = String(s).trim().replace(/\s/g, '');
@@ -398,7 +406,7 @@ function validPlan(p) {
 const state = {
   plan: normalizePlan(LS.get('plan', null)),
   sessions: Array.isArray(LS.get('sessions', null)) ? LS.get('sessions', []) : [],
-  settings: Object.assign({ rest: 90, autoRest: true, step: 2 }, LS.get('settings', {})),
+  settings: Object.assign({ rest: 90, autoRest: true, step: 2, som: 'normal', telaLigada: true }, LS.get('settings', {})),
   draft: LS.get('draft', null),
   view: 'treino',
   sel: null,
@@ -449,7 +457,7 @@ function lastOf(exId, excludeId) {
   for (let i = ss.length - 1; i >= 0; i--) {
     const s = ss[i]; if (s.id === excludeId) continue;
     const it = s.itens && s.itens[exId];
-    if (it && it.carga != null) return { carga: it.carga, data: s.data };
+    if (it && it.carga != null) return { carga: it.carga, data: s.data, cargas: Array.isArray(it.cargas) ? it.cargas : null };
   }
   return null;
 }
@@ -464,7 +472,7 @@ function suggested() {
 function seriesOf(exId) {
   return sortedSessions()
     .filter(s => s.itens && s.itens[exId] && s.itens[exId].carga != null)
-    .map(s => ({ data: s.data, v: s.itens[exId].carga, feitas: s.itens[exId].feitas || 0, obs: s.itens[exId].obs || '', sid: s.id }));
+    .map(s => ({ data: s.data, v: s.itens[exId].carga, feitas: s.itens[exId].feitas || 0, total: s.itens[exId].total || 0, cargas: Array.isArray(s.itens[exId].cargas) ? s.itens[exId].cargas : null, obs: s.itens[exId].obs || '', sid: s.id }));
 }
 function statsOf(pts) {
   if (!pts.length) return null;
@@ -528,25 +536,46 @@ function viewDraft() {
   </div>`;
 }
 
+function setPlaceholder(it, l, i) {
+  if (l && l.cargas && l.cargas[i - 1] != null) return nfIn.format(l.cargas[i - 1]);
+  const base = parseNum(it.carga);
+  if (base != null && !Number.isNaN(base)) return nfIn.format(base);
+  return l ? nfIn.format(l.carga) : '0';
+}
 function exCard(e, d) {
   const it = d.itens[e.id] || { carga: '', feitas: 0, obs: '' };
   const l = lastOf(e.id, d.sid);
-  const n = nSeries(e), f = it.feitas || 0;
-  let dots = '';
-  for (let i = 1; i <= n; i++) dots += `<button type="button" class="setdot" data-action="set" data-ex="${esc(e.id)}" data-i="${i}" aria-pressed="${i <= f}" aria-label="Série ${i}">${i}</button>`;
-  const bad = Number.isNaN(parseNum(it.carga));
+  const n = nSeries(e), f = it.feitas || 0, u = unitLabel(e.unidade), id = esc(e.id);
+  const lastTxt = l ? `última: <b>${esc(l.cargas ? fmtSets(l.cargas) + ' ' + u : fmtCarga(l.carga, e.unidade))}</b><br>em ${esc(fmtDM(l.data))}` : 'primeiro registro';
+  let body;
+  if (it.porSerie && n) {
+    let cols = '';
+    for (let i = 1; i <= n; i++) {
+      const v = (it.cargas || [])[i - 1], val = v == null ? '' : v;
+      cols += `<div class="pset"><label class="plbl" for="c-${id}-${i}">Série ${i}</label>
+        <input class="cinput sm${Number.isNaN(parseNum(val)) ? ' bad' : ''}" id="c-${id}-${i}" data-ex="${id}" data-f="cs" data-i="${i}" inputmode="decimal" autocomplete="off" value="${esc(val)}" placeholder="${esc(setPlaceholder(it, l, i))}" aria-label="Carga da série ${i} de ${esc(e.nome)} em ${u}">
+        <button type="button" class="setdot" data-action="set" data-ex="${id}" data-i="${i}" aria-pressed="${i <= f}" aria-label="Marcar série ${i} como feita">${i}</button></div>`;
+    }
+    body = `<div class="row between pnote"><span>Carga de cada série, em ${u}</span><span class="lastnote" style="margin:0">${lastTxt}</span></div><div class="psets">${cols}</div>`;
+  } else {
+    let dots = '';
+    for (let i = 1; i <= n; i++) dots += `<button type="button" class="setdot" data-action="set" data-ex="${id}" data-i="${i}" aria-pressed="${i <= f}" aria-label="Série ${i}">${i}</button>`;
+    const bad = Number.isNaN(parseNum(it.carga));
+    body = `<div class="load">
+      <button type="button" class="step" data-action="dec" data-ex="${id}" aria-label="Diminuir carga de ${esc(e.nome)}">−</button>
+      <input class="cinput${bad ? ' bad' : ''}" id="c-${id}" data-ex="${id}" data-f="carga" inputmode="decimal" autocomplete="off" value="${esc(it.carga == null ? '' : it.carga)}" placeholder="${l ? esc(nfIn.format(l.carga)) : '0'}" aria-label="Carga de ${esc(e.nome)} em ${u}">
+      <button type="button" class="step" data-action="inc" data-ex="${id}" aria-label="Aumentar carga de ${esc(e.nome)}">+</button>
+      <span class="unit">${u}</span>
+      <span class="lastnote">${lastTxt}</span>
+    </div>
+    ${n ? `<div class="sets"><span class="lbl">Séries</span>${dots}</div>` : ''}`;
+  }
   return `<article class="excard${n && f >= n ? ' done' : ''}">
     <div class="exhead"><span class="ord">${esc(e.ordem)}</span><div class="grow"><div class="exname">${esc(e.nome)}</div><div class="presc">${esc(presc(e))}</div></div></div>
     ${e.obs ? `<div class="obs">${esc(e.obs)}</div>` : ''}
-    <div class="load">
-      <button type="button" class="step" data-action="dec" data-ex="${esc(e.id)}" aria-label="Diminuir carga de ${esc(e.nome)}">−</button>
-      <input class="cinput${bad ? ' bad' : ''}" id="c-${esc(e.id)}" data-ex="${esc(e.id)}" data-f="carga" inputmode="decimal" autocomplete="off" value="${esc(it.carga == null ? '' : it.carga)}" placeholder="${l ? esc(nfIn.format(l.carga)) : '0'}" aria-label="Carga de ${esc(e.nome)} em ${unitLabel(e.unidade)}">
-      <button type="button" class="step" data-action="inc" data-ex="${esc(e.id)}" aria-label="Aumentar carga de ${esc(e.nome)}">+</button>
-      <span class="unit">${unitLabel(e.unidade)}</span>
-      <span class="lastnote">${l ? `última: <b>${esc(fmtCarga(l.carga, e.unidade))}</b><br>em ${esc(fmtDM(l.data))}` : 'primeiro registro'}</span>
-    </div>
-    ${n ? `<div class="sets"><span class="lbl">Séries</span>${dots}</div>` : ''}
-    <input class="input" id="o-${esc(e.id)}" data-ex="${esc(e.id)}" data-f="obs" value="${esc(it.obs || '')}" placeholder="Observação (opcional)" autocomplete="off" aria-label="Observação de ${esc(e.nome)}">
+    ${body}
+    ${n > 1 ? `<button type="button" class="linkbtn" data-action="perset" data-ex="${id}">${it.porSerie ? 'Usar o mesmo peso em todas as séries' : 'Peso diferente em cada série'}</button>` : ''}
+    <input class="input" id="o-${id}" data-ex="${id}" data-f="obs" value="${esc(it.obs || '')}" placeholder="Observação (opcional)" autocomplete="off" aria-label="Observação de ${esc(e.nome)}">
   </article>`;
 }
 
@@ -561,9 +590,9 @@ function viewHistorico() {
   const in7 = ss.filter(s => now - parseISO(s.data).getTime() < 7 * day).length;
   const in30 = ss.filter(s => now - parseISO(s.data).getTime() < 30 * day).length;
   let html = `<div class="card"><div class="sumgrid">
-    <div class="stat"><small>Total</small><b>${ss.length}</b></div>
-    <div class="stat"><small>Últimos 7 dias</small><b>${in7}</b></div>
-    <div class="stat"><small>Últimos 30 dias</small><b>${in30}</b></div></div></div>`;
+    <div class="stat"><small>Treinos</small><b>${ss.length}</b></div>
+    <div class="stat"><small>7 dias</small><b>${in7}</b></div>
+    <div class="stat"><small>30 dias</small><b>${in30}</b></div></div></div>`;
   const dsb = daysSinceBackup();
   if (ss.length >= 4 && (dsb == null || dsb >= 14)) html += `<div class="card row gap" style="margin-top:10px"><p class="small grow">${dsb == null ? 'Você ainda não fez backup.' : `Último backup há ${dsb} dias.`} Seus treinos ficam só neste celular.</p><button type="button" class="btn sm" data-action="backup">Baixar backup</button></div>`;
   let month = '';
@@ -583,7 +612,7 @@ function viewHistorico() {
         ${ids.length ? `<div class="tscroll"><table class="t"><thead><tr><th>Exercício</th><th class="n">Carga</th><th class="n">Séries</th></tr></thead><tbody>${ids.map(id => {
           const it = s.itens[id], fx = findEx(id);
           const nome = fx ? fx.e.nome : ((s.nomes && s.nomes[id]) || 'Exercício removido');
-          return `<tr><td>${esc(nome)}${it.obs ? `<div class="obs">${esc(it.obs)}</div>` : ''}</td><td class="n">${esc(fmtCarga(it.carga, fx ? fx.e.unidade : 'kg'))}</td><td class="n">${it.feitas || 0}${fx && nSeries(fx.e) ? '/' + nSeries(fx.e) : ''}</td></tr>`;
+          return `<tr><td>${esc(nome)}${it.obs ? `<div class="obs">${esc(it.obs)}</div>` : ''}</td><td class="n">${esc(fmtCarga(it.carga, fx ? fx.e.unidade : 'kg'))}${Array.isArray(it.cargas) ? `<div class="obs">${esc(fmtSets(it.cargas))}</div>` : ''}</td><td class="n">${it.feitas || 0}/${it.total || Math.max(it.feitas || 0, fx ? nSeries(fx.e) : 0)}</td></tr>`;
         }).join('')}</tbody></table></div>` : '<p class="muted small">Sem cargas registradas.</p>'}
         ${s.nota ? `<p class="small"><b>Anotação:</b> ${esc(s.nota)}</p>` : ''}
         <div class="row gap"><button type="button" class="btn sm" data-action="edit-sess" data-id="${esc(s.id)}">Editar</button><button type="button" class="btn sm danger" data-action="del-sess" data-id="${esc(s.id)}">Excluir</button></div>
@@ -628,13 +657,13 @@ function viewEvolucao() {
         <div class="stat"><small>Recorde</small><b>${esc(fmtCarga(st.max, e.unidade))}</b></div>
         <div class="stat"><small>Variação</small><b class="${st.pct > 0 ? 'up' : st.pct < 0 ? 'down' : ''}">${esc(st.pctText)}</b></div>
       </div>
-      <div class="chart" id="chart"></div>`
+      <div class="chart" id="chart"></div>${pts.some(p => p.cargas) ? '<p class="hint" style="margin:0">Nos treinos com peso por série, o gráfico usa a maior carga do dia.</p>' : ''}`
     : `<p class="muted">Nenhuma carga registrada neste exercício. Salve um treino com a carga preenchida e a linha de evolução aparece aqui.</p>`}
   </div>
   ${exportUI}`;
   if (pts.length) {
     html += `<h3 class="sec">Registros</h3><div class="card tscroll"><table class="t"><thead><tr><th>Data</th><th class="n">Carga</th><th class="n">Séries</th><th>Obs.</th></tr></thead><tbody>${pts.slice().reverse().map(p =>
-      `<tr><td>${esc(fmtDMY(p.data))}</td><td class="n">${esc(fmtCarga(p.v, e.unidade))}</td><td class="n">${p.feitas}${nSeries(e) ? '/' + nSeries(e) : ''}</td><td class="muted">${esc(p.obs)}</td></tr>`).join('')}</tbody></table></div>`;
+      `<tr><td>${esc(fmtDMY(p.data))}</td><td class="n">${esc(fmtCarga(p.v, e.unidade))}${p.cargas ? `<div class="obs">${esc(fmtSets(p.cargas))}</div>` : ''}</td><td class="n">${p.feitas}/${p.total || Math.max(p.feitas, nSeries(e))}</td><td class="muted">${esc(p.obs)}</td></tr>`).join('')}</tbody></table></div>`;
   }
   html += `<h3 class="sec">Resumo do Treino ${esc(tid)}</h3><div class="stack" style="${tv(tid)}">${exs.map(x => {
     const p = seriesOf(x.id), s = statsOf(p);
@@ -691,6 +720,12 @@ function viewFicha() {
     <label class="field" for="s-series"><span>Séries por exercício</span><select class="input" id="s-series">${Array.from({ length: 8 }, (_, i) => i + 1).map(v => `<option value="${v}"${sp === v ? ' selected' : ''}>${v} ${v === 1 ? 'série' : 'séries'}</option>`).join('')}</select><span class="small" style="font-weight:500">Vale para todos os exercícios, menos os que têm número próprio de séries na ficha.</span></label>
     <label class="field" for="s-rest"><span>Descanso entre séries</span><select class="input" id="s-rest">${[30, 45, 60, 75, 90, 120, 150, 180].map(v => `<option value="${v}"${+s.rest === v ? ' selected' : ''}>${v < 60 ? v + ' s' : Math.floor(v / 60) + ' min' + (v % 60 ? ' ' + (v % 60) + ' s' : '')}</option>`).join('')}</select></label>
     <label class="toggle" for="s-auto"><input type="checkbox" id="s-auto"${s.autoRest ? ' checked' : ''}> Iniciar o descanso ao marcar uma série</label>
+    <label class="field" for="s-som"><span>Som no fim do descanso</span><select class="input" id="s-som">
+      <option value="normal"${s.som !== 'alto' && s.som !== 'off' ? ' selected' : ''}>Ligado</option>
+      ${'audioSession' in navigator ? `<option value="alto"${s.som === 'alto' ? ' selected' : ''}>Ligado até no modo silencioso (pausa a música)</option>` : ''}
+      <option value="off"${s.som === 'off' ? ' selected' : ''}>Desligado</option></select></label>
+    <button type="button" class="btn sm" data-action="test-sound" style="align-self:flex-start">Testar som</button>
+    <label class="toggle" for="s-tela"><input type="checkbox" id="s-tela"${s.telaLigada !== false ? ' checked' : ''}> Manter a tela ligada durante o treino</label>
     <label class="field" for="s-step"><span>Passo dos botões − e + (kg)</span><select class="input" id="s-step">${[1, 2, 2.5, 5].map(v => `<option value="${v}"${+s.step === v ? ' selected' : ''}>${nf.format(v)} kg</option>`).join('')}</select></label>
   </div>
   <h3 class="sec">Backup</h3><div class="card stack">
@@ -724,7 +759,7 @@ function renderChrome() {
   document.querySelectorAll('nav.tabs a').forEach(a => { if (a.dataset.v === state.view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   $('#draft-badge').hidden = !state.draft;
 }
-function render() { renderChrome(); renderView(); }
+function render() { renderChrome(); renderView(); syncWakeLock(); }
 
 /* ---------- Gráficos ---------- */
 function niceTicks(lo, hi, n) {
@@ -816,32 +851,62 @@ function ask(title, text, okLabel = 'Confirmar', danger = false) {
 
 /* ---------- Timer de descanso ---------- */
 const timer = { end: 0, h: null, fired: false };
-let audioCtx = null;
-function primeAudio() { try { if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); } if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {}); } catch (e) { audioCtx = null; } }
-function beep() {
-  try {
-    if (!audioCtx) return;
-    [0, 0.22].forEach(off => {
-      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-      o.frequency.value = 880; o.connect(g); g.connect(audioCtx.destination);
-      const t = audioCtx.currentTime + off;
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
-      o.start(t); o.stop(t + 0.18);
-    });
-  } catch (e) { /* sem som */ }
-  try { if (navigator.vibrate) navigator.vibrate([180, 90, 180]); } catch (e) { /* sem vibração */ }
+let audioCtx = null, unlocked = false;
+function applyAudioSession() {
+  try { if ('audioSession' in navigator) navigator.audioSession.type = state.settings.som === 'alto' ? 'playback' : 'auto'; } catch (e) { /* sem suporte */ }
 }
+function primeAudio() {
+  try {
+    applyAudioSession();
+    if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
+    if (!audioCtx) return;
+    if (audioCtx.state !== 'running') audioCtx.resume().catch(() => {});
+    if (!unlocked) { const sb = audioCtx.createBufferSource(); sb.buffer = audioCtx.createBuffer(1, 1, 22050); sb.connect(audioCtx.destination); sb.start(0); unlocked = true; }
+  } catch (e) { audioCtx = null; }
+}
+function tone(freq, start, dur, vol) {
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = 'square'; o.frequency.value = freq; o.connect(g); g.connect(audioCtx.destination);
+  const t = audioCtx.currentTime + start;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+  g.gain.setValueAtTime(vol, t + dur - 0.04); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.start(t); o.stop(t + dur + 0.02);
+}
+function playSound(kind) {
+  if (state.settings.som === 'off' || !audioCtx) return;
+  try {
+    if (audioCtx.state !== 'running') audioCtx.resume().catch(() => {});
+    if (kind === 'tick') tone(880, 0, 0.09, 0.16);
+    else { tone(988, 0, 0.22, 0.32); tone(988, 0.3, 0.22, 0.32); tone(1319, 0.6, 0.55, 0.38); }
+  } catch (e) { /* sem som */ }
+}
+function alarm() {
+  playSound('end');
+  try { if (navigator.vibrate) navigator.vibrate([250, 120, 250, 120, 450]); } catch (e) { /* sem vibração */ }
+}
+let wakeLock = null, wlBusy = false;
+async function syncWakeLock() {
+  if (wlBusy || !('wakeLock' in navigator)) return;
+  const want = !!state.draft && state.settings.telaLigada !== false && document.visibilityState === 'visible';
+  wlBusy = true;
+  try {
+    if (want && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); }
+    else if (!want && wakeLock) { const w = wakeLock; wakeLock = null; await w.release(); }
+  } catch (e) { wakeLock = null; } finally { wlBusy = false; }
+}
+document.addEventListener('visibilitychange', () => { syncWakeLock(); if (document.visibilityState === 'visible' && !$('#timer').hidden) tick(); });
 const mmss = s => `${Math.floor(s / 60)}:${pad2(s % 60)}`;
 function startTimer(sec) {
-  timer.end = Date.now() + sec * 1000; timer.fired = false;
+  timer.end = Date.now() + sec * 1000; timer.fired = false; timer.lastTick = null;
   const el = $('#timer'); el.hidden = false; el.classList.remove('over'); $('#timer-l').textContent = 'Descanso';
-  clearInterval(timer.h); tick(); timer.h = setInterval(tick, 250);
+  clearInterval(timer.h); clearTimeout(timer.h); tick(); timer.h = setInterval(tick, 250);
 }
 function tick() {
   const left = Math.ceil((timer.end - Date.now()) / 1000);
   $('#timer-t').textContent = mmss(Math.max(0, left));
+  if (left > 0 && left <= 3 && left !== timer.lastTick && !timer.fired) { timer.lastTick = left; playSound('tick'); }
   if (left <= 0 && !timer.fired) {
-    timer.fired = true; $('#timer').classList.add('over'); $('#timer-l').textContent = 'Próxima série'; beep();
+    timer.fired = true; $('#timer').classList.add('over'); $('#timer-l').textContent = 'Próxima série'; alarm();
     clearInterval(timer.h); timer.h = setTimeout(stopTimer, 9000);
   }
 }
@@ -952,12 +1017,12 @@ function buildPdfExercise(t, e) {
   doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(20, 24, 32); doc.text('Registros', 16, y); y += 7;
   head();
   pts.forEach(p => {
-    const obs = doc.splitTextToSize(p.obs || '', 88);
+    const obs = doc.splitTextToSize([p.cargas ? 'Por série: ' + fmtSets(p.cargas) : '', p.obs || ''].filter(Boolean).join(' · '), 88);
     const rh = Math.max(6.5, obs.length * 4 + 2.5);
     if (y + rh > 280) { doc.addPage(); y = 20; head(); }
     doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(20, 24, 32);
     doc.text(fmtDMY(p.data), 16, y); doc.text(fmtCarga(p.v, e.unidade), 74, y, { align: 'right' });
-    doc.text(`${p.feitas}${nSeries(e) ? '/' + nSeries(e) : ''}`, 98, y, { align: 'right' });
+    doc.text(`${p.feitas}/${p.total || Math.max(p.feitas, nSeries(e))}`, 98, y, { align: 'right' });
     doc.setTextColor(90, 98, 114); if (obs.length && obs[0]) doc.text(obs, 106, y);
     y += rh - 3.5; doc.setDrawColor(236, 238, 242); doc.line(16, y, 194, y); y += 3.5 + 1;
   });
@@ -1021,7 +1086,10 @@ const actions = {
   pick: b => { state.sel = b.dataset.t; render(); },
   start: async b => {
     const t = treinoById(b.dataset.t); if (!t) return;
-    state.draft = { sid: null, treino: t.id, data: todayISO(), itens: {}, nota: '', criadoEm: Date.now() };
+    primeAudio();
+    const itens = {};
+    for (const e of t.exercicios) { const l = lastOf(e.id); if (l && l.cargas && nSeries(e) > 1) itens[e.id] = { carga: '', feitas: 0, obs: '', porSerie: true, cargas: [] }; }
+    state.draft = { sid: null, treino: t.id, data: todayISO(), itens, nota: '', criadoEm: Date.now() };
     LS.set('draft', state.draft); render(); window.scrollTo(0, 0);
   },
   set: b => {
@@ -1030,10 +1098,37 @@ const actions = {
     const it = draftItem(e.e.id), i = +b.dataset.i;
     const marking = i > (it.feitas || 0);
     it.feitas = marking ? i : i - 1;
-    if (marking && parseNum(it.carga) == null) { const l = lastOf(e.e.id, state.draft.sid); if (l) it.carga = nfIn.format(l.carga); }
+    if (marking) {
+      const l = lastOf(e.e.id, state.draft.sid);
+      if (it.porSerie) {
+        if (!Array.isArray(it.cargas)) it.cargas = [];
+        for (let k = 1; k <= i; k++) {
+          if (parseNum(it.cargas[k - 1]) != null) continue;
+          const prev = k > 1 ? parseNum(it.cargas[k - 2]) : null;
+          const v = prev != null && !Number.isNaN(prev) ? prev : (l && l.cargas && l.cargas[k - 1] != null ? l.cargas[k - 1] : (parseNum(it.carga) ?? (l ? l.carga : null)));
+          if (v != null && !Number.isNaN(v)) it.cargas[k - 1] = nfIn.format(v);
+        }
+      } else if (parseNum(it.carga) == null && l) it.carga = nfIn.format(l.carga);
+    }
     saveDraftSoon(); render();
     if (marking && state.settings.autoRest) startTimer(+state.settings.rest || 90);
   },
+  perset: b => {
+    const fx = findEx(b.dataset.ex); if (!fx) return;
+    const it = draftItem(fx.e.id), n = nSeries(fx.e);
+    if (!it.porSerie) {
+      const base = parseNum(it.carga);
+      const fill = base != null && !Number.isNaN(base) ? nfIn.format(base) : '';
+      it.cargas = Array.from({ length: n }, (_, k) => (it.cargas && it.cargas[k]) || fill);
+      it.porSerie = true;
+    } else {
+      const vals = (it.cargas || []).map(parseNum).filter(v => v != null && !Number.isNaN(v));
+      if (vals.length) it.carga = nfIn.format(Math.max(...vals));
+      it.porSerie = false;
+    }
+    saveDraftSoon(); render();
+  },
+  'test-sound': () => { primeAudio(); alarm(); },
   inc: b => bump(b, 1),
   dec: b => bump(b, -1),
   discard: async () => {
@@ -1047,11 +1142,22 @@ const actions = {
     const itens = {}, nomes = {};
     for (const e of t.exercicios) {
       const it = d.itens[e.id]; if (!it) continue;
-      const c = parseNum(it.carga);
-      if (Number.isNaN(c)) { toast(`Carga inválida em "${e.nome}". Use só números, como 22,5.`); const el = document.getElementById('c-' + e.id); if (el) el.focus(); return; }
+      const n = nSeries(e);
+      let c = null, cargas = null;
+      if (it.porSerie && n) {
+        const arr = Array.from({ length: n }, (_, k) => parseNum((it.cargas || [])[k]));
+        const badK = arr.findIndex(v => Number.isNaN(v));
+        if (badK >= 0) { toast(`Carga inválida na série ${badK + 1} de "${e.nome}". Use só números, como 22,5.`); const el = document.getElementById(`c-${e.id}-${badK + 1}`); if (el) el.focus(); return; }
+        const vals = arr.filter(v => v != null);
+        if (vals.length) { c = Math.max(...vals); if (!vals.every(v => v === vals[0])) cargas = arr; }
+      } else {
+        c = parseNum(it.carga);
+        if (Number.isNaN(c)) { toast(`Carga inválida em "${e.nome}". Use só números, como 22,5.`); const el = document.getElementById('c-' + e.id); if (el) el.focus(); return; }
+      }
       const f = it.feitas || 0, o = String(it.obs || '').trim();
       if (c == null && !f && !o) continue;
-      itens[e.id] = { carga: c, feitas: f, obs: o }; nomes[e.id] = e.nome;
+      itens[e.id] = { carga: c, feitas: f, total: n, obs: o }; if (cargas) itens[e.id].cargas = cargas;
+      nomes[e.id] = e.nome;
     }
     if (!Object.keys(itens).length && !await ask('Salvar sem cargas?', 'Nenhuma carga ou série foi marcada neste treino.', 'Salvar assim')) return;
     const sess = { id: d.sid || newId('s'), treino: d.treino, data: d.data, itens, nomes, nota: String(d.nota || '').trim(), criadoEm: d.criadoEm || Date.now(), atualizadoEm: Date.now() };
@@ -1065,7 +1171,7 @@ const actions = {
     const s = state.sessions.find(x => x.id === b.dataset.id); if (!s) return;
     if (state.draft && !await ask('Trocar o treino em andamento?', 'Há um treino em andamento que ainda não foi salvo. Ele será descartado.', 'Descartar e editar', true)) return;
     const itens = {};
-    for (const [id, it] of Object.entries(s.itens || {})) itens[id] = { carga: it.carga == null ? '' : nfIn.format(it.carga), feitas: it.feitas || 0, obs: it.obs || '' };
+    for (const [id, it] of Object.entries(s.itens || {})) itens[id] = { carga: it.carga == null ? '' : nfIn.format(it.carga), feitas: it.feitas || 0, obs: it.obs || '', porSerie: Array.isArray(it.cargas), cargas: Array.isArray(it.cargas) ? it.cargas.map(v => v == null ? '' : nfIn.format(v)) : [] };
     state.draft = { sid: s.id, treino: s.treino, data: s.data, itens, nota: s.nota || '', criadoEm: s.criadoEm };
     LS.set('draft', state.draft); go('treino'); window.scrollTo(0, 0);
   },
@@ -1151,6 +1257,13 @@ document.addEventListener('keydown', e => {
 });
 document.addEventListener('input', e => {
   const el = e.target;
+  if (el.dataset.f === 'cs' && state.draft) {
+    const it = draftItem(el.dataset.ex);
+    if (!Array.isArray(it.cargas)) it.cargas = [];
+    it.cargas[+el.dataset.i - 1] = el.value; saveDraftSoon();
+    el.classList.toggle('bad', Number.isNaN(parseNum(el.value)));
+    return;
+  }
   if (el.dataset.f && state.draft) {
     draftItem(el.dataset.ex)[el.dataset.f] = el.value; saveDraftSoon();
     if (el.dataset.f === 'carga') el.classList.toggle('bad', Number.isNaN(parseNum(el.value)));
@@ -1177,6 +1290,8 @@ document.addEventListener('change', async e => {
   }
   if (el.id === 's-rest') { state.settings.rest = +el.value; LS.set('settings', state.settings); return; }
   if (el.id === 's-auto') { state.settings.autoRest = el.checked; LS.set('settings', state.settings); return; }
+  if (el.id === 's-som') { state.settings.som = el.value; LS.set('settings', state.settings); applyAudioSession(); if (el.value !== 'off') { primeAudio(); alarm(); } return; }
+  if (el.id === 's-tela') { state.settings.telaLigada = el.checked; LS.set('settings', state.settings); syncWakeLock(); return; }
   if (el.id === 's-step') { state.settings.step = +el.value; LS.set('settings', state.settings); return; }
   if (el.id === 'imp') {
     const f = el.files && el.files[0]; el.value = ''; if (!f) return;
