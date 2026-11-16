@@ -1,5 +1,5 @@
 /* Meus Treinos: funciona sem internet depois da primeira abertura */
-const VERSION = 'meus-treinos-v4';
+const VERSION = 'meus-treinos-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -59,4 +59,49 @@ self.addEventListener('fetch', event => {
       return res;
     }))
   );
+});
+
+/* Aviso do descanso com o app em segundo plano */
+let restGen = 0;
+const ICON = './icons/icon-192.png';
+async function closeTag(tag) {
+  const list = await self.registration.getNotifications({ tag });
+  list.forEach(n => n.close());
+}
+async function appVisible() {
+  const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  return wins.some(w => w.visibilityState === 'visible');
+}
+self.addEventListener('message', event => {
+  const d = event.data || {};
+  if (d.type === 'rest-start') {
+    const gen = ++restGen;
+    const wait = Math.max(0, Math.min((d.end || 0) - Date.now(), 270000));
+    event.waitUntil(new Promise(r => setTimeout(r, wait)).then(async () => {
+      if (gen !== restGen || await appVisible()) return;
+      await closeTag('rest-live');
+      await self.registration.showNotification('Descanso acabou', {
+        body: 'Hora da próxima série.', tag: 'rest-end', renotify: true,
+        vibrate: [300, 120, 300, 120, 500], icon: ICON, badge: ICON, data: { url: './#treino' }
+      });
+    }));
+  } else if (d.type === 'rest-cancel') {
+    restGen++;
+    event.waitUntil(closeTag('rest-live'));
+  } else if (d.type === 'rest-bg') {
+    event.waitUntil(self.registration.showNotification('Descanso em andamento', {
+      body: d.body || 'Toque para voltar ao treino.', tag: 'rest-live', silent: true, icon: ICON, badge: ICON,
+      timestamp: d.end || Date.now(), data: { url: './#treino' }
+    }));
+  } else if (d.type === 'rest-fg') {
+    event.waitUntil(closeTag('rest-live').then(() => closeTag('rest-end')));
+  }
+});
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const w of wins) { if ('focus' in w) return w.focus(); }
+    return self.clients.openWindow((event.notification.data && event.notification.data.url) || './');
+  })());
 });

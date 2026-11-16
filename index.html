@@ -243,6 +243,16 @@ nav.tabs .badge { position: absolute; top: 4px; right: calc(50% - 20px); width: 
 /* Modal + toast */
 .modal { position: fixed; inset: 0; background: rgba(8, 10, 14, .55); display: flex; align-items: flex-end; justify-content: center; z-index: 50; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
 .modal .box { background: var(--surface); color: var(--ink); border-radius: 16px; padding: 18px; max-width: 420px; width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.modal .box.vbox { max-width: 560px; max-height: calc(100% - 8px); overflow-y: auto; gap: 12px; }
+.vframe { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 12px; overflow: hidden; }
+.vframe.tall { width: auto; height: min(60vh, 520px); aspect-ratio: 9 / 16; margin: 0 auto; }
+.vframe iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+video.own { display: block; width: 100%; max-height: 60vh; border-radius: 12px; background: #000; }
+.vidbtn { display: inline-flex; align-items: center; gap: 5px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 4px 11px; font-size: 13px; font-weight: 600; cursor: pointer; min-height: 32px; white-space: nowrap; flex: none; }
+.vidbtn.has { background: var(--t-soft); border-color: var(--t); }
+.exrow .vidbtn { margin-top: 7px; }
+.vbox a.small { color: var(--accent); font-weight: 600; align-self: flex-start; }
+.vsec { border-top: 1px solid var(--line); padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
 .modal h3 { margin: 0; font-family: var(--font-display); text-transform: uppercase; font-size: 22px; font-weight: 600; }
 .modal p { color: var(--muted); }
 @media (min-width: 600px) { .modal { align-items: center; } }
@@ -444,6 +454,7 @@ const state = {
   calMonth: null,
   calDay: null,
   evoMode: 'cargas',
+  vids: new Set(),
   view: 'treino',
   sel: null,
   evo: { treino: null, ex: null },
@@ -551,6 +562,50 @@ function weekCard() {
   return `<div class="card week" style="margin-bottom:12px;padding:10px 14px"><div><div class="small"><b>Esta semana: ${w.now} de ${w.meta}</b></div><div class="muted" style="font-size:12.5px">${msg}${w.streak > 1 ? ` · ${w.streak} semanas seguidas` : ''}</div></div><div class="wbars" aria-hidden="true">${bars}</div></div>`;
 }
 
+const PLAY = '<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>';
+const hasVideo = e => !!(e && (e.video || state.vids.has(e.id)));
+const ytSearch = e => `https://www.youtube.com/results?search_query=${encodeURIComponent(e.nome + ' execução correta')}`;
+function ytInfo(url) {
+  try {
+    const u = new URL(String(url).trim());
+    const h = u.hostname.replace(/^(www|m)\./, '');
+    let id = null, tall = false;
+    if (h === 'youtu.be') id = u.pathname.slice(1).split('/')[0];
+    else if (h === 'youtube.com' || h === 'youtube-nocookie.com' || h === 'music.youtube.com') {
+      const parts = u.pathname.split('/');
+      if (parts[1] === 'shorts') { id = parts[2]; tall = true; }
+      else if (parts[1] === 'embed' || parts[1] === 'live') id = parts[2];
+      else id = u.searchParams.get('v');
+    }
+    return id && /^[\w-]{6,20}$/.test(id) ? { id, tall } : null;
+  } catch (e) { return null; }
+}
+const VDB = {
+  db: null,
+  open() {
+    if (this.db) return Promise.resolve(this.db);
+    return new Promise((res, rej) => {
+      if (!('indexedDB' in window)) { rej(new Error('sem IndexedDB')); return; }
+      const r = indexedDB.open('meus-treinos', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('videos');
+      r.onsuccess = () => { this.db = r.result; res(r.result); };
+      r.onerror = () => rej(r.error);
+    });
+  },
+  async run(mode, fn) {
+    const db = await this.open();
+    return new Promise((res, rej) => {
+      const t = db.transaction('videos', mode), req = fn(t.objectStore('videos'));
+      t.oncomplete = () => res(req ? req.result : undefined);
+      t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+    });
+  },
+  get(k) { return this.run('readonly', st => st.get(k)); },
+  put(k, v) { return this.run('readwrite', st => st.put(v, k)); },
+  del(k) { return this.run('readwrite', st => st.delete(k)); },
+  keys() { return this.run('readonly', st => st.getAllKeys()); }
+};
+
 /* ---------- Renderização ---------- */
 const viewEl = $('#view');
 
@@ -579,7 +634,7 @@ function viewTreino() {
   <ul class="exlist" style="${tv(t.id)}">${t.exercicios.map(e => {
     const l = lastOf(e.id);
     return `<li class="exrow"><span class="ord">${esc(e.ordem)}</span>
-      <div><div class="exname">${esc(e.nome)}</div><div class="presc">${esc(presc(e))}</div>${e.obs ? `<div class="obs">${esc(e.obs)}</div>` : ''}</div>
+      <div><div class="exname">${esc(e.nome)}</div><div class="presc">${esc(presc(e))}</div>${e.obs ? `<div class="obs">${esc(e.obs)}</div>` : ''}<button type="button" class="vidbtn${hasVideo(e) ? ' has' : ''}" data-action="video" data-ex="${esc(e.id)}" aria-label="Como fazer: ${esc(e.nome)}">${PLAY} ${hasVideo(e) ? 'Ver vídeo' : 'Como fazer'}</button></div>
       <div class="last">${l ? `<b>${esc(fmtCarga(l.carga, e.unidade))}</b><small>em ${esc(fmtDM(l.data))}</small>` : '<small>sem registro</small>'}</div></li>`;
   }).join('')}</ul>`;
 }
@@ -641,7 +696,7 @@ function exCard(e, d) {
     ${n ? `<div class="sets"><span class="lbl">Séries</span>${dots}</div>` : ''}`;
   }
   return `<article class="excard${n && f >= n ? ' done' : ''}">
-    <div class="exhead"><span class="ord">${esc(e.ordem)}</span><div class="grow"><div class="exname">${esc(e.nome)}</div><div class="presc">${esc(presc(e))}</div></div></div>
+    <div class="exhead"><span class="ord">${esc(e.ordem)}</span><div class="grow"><div class="exname">${esc(e.nome)}</div><div class="presc">${esc(presc(e))}</div></div><button type="button" class="vidbtn${hasVideo(e) ? ' has' : ''}" data-action="video" data-ex="${id}" aria-label="Vídeo de execução: ${esc(e.nome)}">${PLAY} Vídeo</button></div>
     ${e.obs ? `<div class="obs">${esc(e.obs)}</div>` : ''}
     ${body}
     ${n > 1 ? `<button type="button" class="linkbtn" data-action="perset" data-ex="${id}">${it.porSerie ? 'Usar o mesmo peso em todas as séries' : 'Peso diferente em cada série'}</button>` : ''}
@@ -846,6 +901,7 @@ function viewFicha() {
               <option value="reps"${e.unidade === 'reps' ? ' selected' : ''}>Repetições</option></select></label>
           </div>
           <label class="field full" for="e-obs-${esc(e.id)}"><span>Observação</span><input class="input" id="e-obs-${esc(e.id)}" data-ed="obs" data-ex="${esc(e.id)}" value="${esc(e.obs || '')}" autocomplete="off"></label>
+          <label class="field full" for="e-video-${esc(e.id)}"><span>Link do vídeo (YouTube, Instagram…)</span><input class="input" id="e-video-${esc(e.id)}" data-ed="video" data-ex="${esc(e.id)}" value="${esc(e.video || '')}" placeholder="https://youtu.be/…" inputmode="url" autocomplete="off"></label>
         </div>
         <div class="row gap wrap">
           <button type="button" class="btn sm" data-action="ed-up" data-ex="${esc(e.id)}" ${i === 0 ? 'disabled' : ''} aria-label="Subir ${esc(e.nome)}">↑ Subir</button>
@@ -870,10 +926,12 @@ function viewFicha() {
       <option value="off"${s.som === 'off' ? ' selected' : ''}>Desligado</option></select></label>
     <button type="button" class="btn sm" data-action="test-sound" style="align-self:flex-start">Testar som</button>
     <label class="toggle" for="s-tela"><input type="checkbox" id="s-tela"${s.telaLigada !== false ? ' checked' : ''}> Manter a tela ligada durante o treino</label>
+    <label class="toggle" for="s-notif"><input type="checkbox" id="s-notif"${s.notif && notifState() === 'granted' ? ' checked' : ''}> Avisar quando o descanso acabar, mesmo fora do app</label>
+    ${notifHint() ? `<p class="small muted" style="margin-top:-4px">${notifHint()}</p>` : ''}
     <label class="field" for="s-step"><span>Passo dos botões − e + (kg)</span><select class="input" id="s-step">${[1, 2, 2.5, 5].map(v => `<option value="${v}"${+s.step === v ? ' selected' : ''}>${nf.format(v)} kg</option>`).join('')}</select></label>
   </div>
   <h3 class="sec">Backup</h3><div class="card stack">
-    <p class="small muted">Seus treinos ficam salvos só neste celular. Baixe um backup de vez em quando e guarde no Drive ou no WhatsApp; se trocar de celular, é só importar.${(() => { const d = daysSinceBackup(); return d == null ? ' Você ainda não baixou nenhum backup.' : ` Último backup: ${d === 0 ? 'hoje' : d === 1 ? 'ontem' : 'há ' + d + ' dias'}.`; })()}</p>
+    <p class="small muted">Seus treinos ficam salvos só neste celular. Baixe um backup de vez em quando e guarde no Drive ou no WhatsApp; se trocar de celular, é só importar. Os links de vídeo entram no backup; vídeos gravados no celular, não.${(() => { const d = daysSinceBackup(); return d == null ? ' Você ainda não baixou nenhum backup.' : ` Último backup: ${d === 0 ? 'hoje' : d === 1 ? 'ontem' : 'há ' + d + ' dias'}.`; })()}</p>
     <div class="row gap wrap">
       <button type="button" class="btn grow" data-action="backup">Baixar backup (.json)</button>
       <button type="button" class="btn grow" data-action="csv">Exportar planilha (.csv)</button>
@@ -1041,23 +1099,49 @@ async function syncWakeLock() {
     else if (!want && wakeLock) { const w = wakeLock; wakeLock = null; await w.release(); }
   } catch (e) { wakeLock = null; } finally { wlBusy = false; }
 }
-document.addEventListener('visibilitychange', () => { syncWakeLock(); if (document.visibilityState === 'visible' && !$('#timer').hidden) tick(); });
+const isStandalone = () => { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } };
+function notifState() { return ('Notification' in window && 'serviceWorker' in navigator) ? Notification.permission : 'unsupported'; }
+function notifHint() {
+  const st = notifState();
+  if (st === 'unsupported') return isStandalone() ? 'Este celular não permite avisos para este app.' : 'Para ativar, abra o app pelo ícone da tela inicial.';
+  if (st === 'denied') return 'Os avisos estão bloqueados. Libere em Ajustes do celular → Notificações → Meus Treinos.';
+  return '';
+}
+const restActive = () => !$('#timer').hidden && !timer.fired;
+const notifOn = () => !!state.settings.notif && notifState() === 'granted';
+function swPost(msg) {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.ready.then(reg => { if (reg.active) reg.active.postMessage(msg); }).catch(() => {});
+}
+const hhmmss = t => { const d = new Date(t); return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`; };
+function syncRestNotice() { if (notifOn() && restActive()) swPost({ type: 'rest-start', end: timer.end }); }
+document.addEventListener('visibilitychange', () => {
+  syncWakeLock();
+  if (document.visibilityState === 'visible') {
+    swPost({ type: 'rest-fg' });
+    if (!$('#timer').hidden) tick();
+  } else if (notifOn() && restActive()) {
+    swPost({ type: 'rest-bg', end: timer.end, body: `Próxima série às ${hhmmss(timer.end)}. Toque para voltar ao treino.` });
+  }
+});
 const mmss = s => `${Math.floor(s / 60)}:${pad2(s % 60)}`;
 function startTimer(sec) {
   timer.end = Date.now() + sec * 1000; timer.fired = false; timer.lastTick = null;
   const el = $('#timer'); el.hidden = false; el.classList.remove('over'); $('#timer-l').textContent = 'Descanso';
   clearInterval(timer.h); clearTimeout(timer.h); tick(); timer.h = setInterval(tick, 250);
+  syncRestNotice();
 }
 function tick() {
   const left = Math.ceil((timer.end - Date.now()) / 1000);
   $('#timer-t').textContent = mmss(Math.max(0, left));
   if (left > 0 && left <= 3 && left !== timer.lastTick && !timer.fired) { timer.lastTick = left; playSound('tick'); }
   if (left <= 0 && !timer.fired) {
-    timer.fired = true; $('#timer').classList.add('over'); $('#timer-l').textContent = 'Próxima série'; alarm();
+    timer.fired = true; $('#timer').classList.add('over'); $('#timer-l').textContent = 'Próxima série';
+    if (left > -5) alarm();
     clearInterval(timer.h); timer.h = setTimeout(stopTimer, 9000);
   }
 }
-function stopTimer() { clearInterval(timer.h); clearTimeout(timer.h); $('#timer').hidden = true; }
+function stopTimer() { const was = !$('#timer').hidden; clearInterval(timer.h); clearTimeout(timer.h); $('#timer').hidden = true; if (was) swPost({ type: 'rest-cancel' }); }
 
 /* ---------- Armazenamento (neste celular) ---------- */
 function upsertLocal(sess) {
@@ -1285,6 +1369,83 @@ async function offerFile(filename, data, okMsg) {
   }
 }
 
+/* ---------- Vídeos de execução ---------- */
+let vm = null; // { exId, el, url }
+function closeVideo() {
+  if (!vm) return;
+  if (vm.url) URL.revokeObjectURL(vm.url);
+  vm.el.remove(); vm = null;
+  document.removeEventListener('keydown', videoKey);
+}
+const videoKey = e => { if (e.key === 'Escape') closeVideo(); };
+async function openVideo(exId) {
+  const fx = findEx(exId); if (!fx) return;
+  if (!vm) {
+    const m = document.createElement('div'); m.className = 'modal';
+    m.addEventListener('click', e => { if (e.target === m) closeVideo(); });
+    document.body.appendChild(m);
+    document.addEventListener('keydown', videoKey);
+    vm = { exId, el: m, url: null };
+  }
+  vm.exId = exId;
+  if (vm.url) { URL.revokeObjectURL(vm.url); vm.url = null; }
+  let own = null;
+  if (state.vids.has(exId)) { try { own = await VDB.get(exId); } catch (e) { own = null; } }
+  if (!vm || vm.exId !== exId) return;
+  const e = fx.e, yt = e.video ? ytInfo(e.video) : null;
+  let player = '';
+  if (own && own.blob) {
+    vm.url = URL.createObjectURL(own.blob);
+    player = `<video class="own" src="${vm.url}" controls playsinline preload="metadata"></video><p class="small muted">Vídeo salvo neste celular · funciona sem internet.</p>`;
+  } else if (yt) {
+    player = `<div class="vframe${yt.tall ? ' tall' : ''}"><iframe src="https://www.youtube-nocookie.com/embed/${yt.id}?playsinline=1&rel=0" title="Vídeo de execução: ${esc(e.nome)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+      ${navigator.onLine === false ? '<p class="small muted">Sem internet agora: o vídeo do YouTube só carrega com conexão.</p>' : ''}
+      <a class="small" href="${esc(e.video)}" target="_blank" rel="noopener">Abrir no YouTube</a>`;
+  } else if (e.video) {
+    player = `<a class="btn primary" href="${esc(e.video)}" target="_blank" rel="noopener">${PLAY} Abrir vídeo</a><p class="small muted">Esse link abre fora do app.</p>`;
+  } else {
+    player = `<p class="muted">Nenhum vídeo salvo para este exercício ainda. Busque um no YouTube e cole o link aqui, ou grave o professor mostrando a execução.</p>`;
+  }
+  vm.el.innerHTML = `<div class="box vbox" role="dialog" aria-modal="true" aria-labelledby="v-t" style="${tv(fx.t.id)}">
+    <div class="row gap between" style="align-items:flex-start"><div><div class="kicker">Treino ${esc(fx.t.id)} · como fazer</div><h3 id="v-t">${esc(e.nome)}</h3></div><button type="button" class="xbtn" data-action="v-close" aria-label="Fechar">✕</button></div>
+    ${player}
+    <div class="vsec">
+      <a class="btn" href="${ytSearch(e)}" target="_blank" rel="noopener">Buscar vídeos no YouTube</a>
+      <label class="field" for="v-link"><span>Link do vídeo</span><input class="input" id="v-link" inputmode="url" autocomplete="off" placeholder="Cole aqui o link do YouTube" value="${esc(e.video || '')}"></label>
+      <div class="row gap wrap">
+        <button type="button" class="btn primary grow" data-action="v-save-link">Salvar link</button>
+        ${e.video ? '<button type="button" class="btn danger" data-action="v-del-link">Remover link</button>' : ''}
+      </div>
+    </div>
+    <div class="vsec">
+      <p class="small muted">Ou guarde um vídeo seu, por exemplo o professor mostrando a execução. Fica só neste celular.</p>
+      <div class="row gap wrap">
+        <label class="btn grow" for="v-cam" tabindex="0">Gravar vídeo</label><input type="file" id="v-cam" class="sr-only" accept="video/*" capture="environment">
+        <label class="btn grow" for="v-file" tabindex="0">Escolher da galeria</label><input type="file" id="v-file" class="sr-only" accept="video/*">
+      </div>
+      ${own ? '<button type="button" class="btn danger" data-action="v-del-file">Apagar vídeo do celular</button>' : ''}
+    </div>
+  </div>`;
+}
+async function setVideoLink(exId, url) {
+  for (const p of [state.plan, state.editPlan]) {
+    if (!p) continue;
+    for (const t of p.treinos) { const e = t.exercicios.find(x => x.id === exId); if (e) { if (url) e.video = url; else delete e.video; } }
+  }
+  return persistPlan();
+}
+async function saveVideoFile(file) {
+  if (!vm || !file) return;
+  if (!/^video\//.test(file.type || 'video/')) { toast('Escolha um arquivo de vídeo.'); return; }
+  if (file.size > 400 * 1024 * 1024) { toast('Vídeo muito grande (mais de 400 MB). Grave um trecho mais curto.'); return; }
+  const exId = vm.exId;
+  try {
+    toast('Salvando vídeo…');
+    await VDB.put(exId, { blob: file, type: file.type, size: file.size, salvoEm: Date.now() });
+    state.vids.add(exId); render(); await openVideo(exId); toast('Vídeo salvo neste celular');
+  } catch (e) { toast('Não consegui salvar o vídeo. Pode faltar espaço no celular.'); }
+}
+
 /* ---------- Ações ---------- */
 function go(v) { if (location.hash !== '#' + v) location.hash = v; else { state.view = v; render(); } }
 function stepFor(e) { return e.unidade === 's' ? 5 : e.unidade === 'reps' ? 1 : (+state.settings.step || 2); }
@@ -1337,6 +1498,24 @@ const actions = {
     saveDraftSoon(); render();
   },
   'test-sound': () => { primeAudio(); alarm(); },
+  video: b => openVideo(b.dataset.ex),
+  'v-close': () => closeVideo(),
+  'v-save-link': async () => {
+    if (!vm) return;
+    const raw = ($('#v-link').value || '').trim();
+    if (!raw) { toast('Cole o link do vídeo primeiro.'); return; }
+    let url;
+    try { url = new URL(/^https?:\/\//i.test(raw) ? raw : 'https://' + raw).href; } catch (e) { toast('Esse link não parece válido.'); return; }
+    if (await setVideoLink(vm.exId, url)) { toast(ytInfo(url) ? 'Vídeo salvo' : 'Link salvo (abre fora do app)'); openVideo(vm.exId); }
+  },
+  'v-del-link': async () => { if (vm && await setVideoLink(vm.exId, '')) { toast('Link removido'); openVideo(vm.exId); } },
+  'v-del-file': async () => {
+    if (!vm) return;
+    const exId = vm.exId;
+    if (!await ask('Apagar o vídeo?', 'O vídeo gravado deste exercício será apagado do celular.', 'Apagar', true)) return;
+    try { await VDB.del(exId); } catch (e) { /* já não existia */ }
+    state.vids.delete(exId); render(); openVideo(exId); toast('Vídeo apagado');
+  },
   'rest-now': () => { primeAudio(); startTimer(+state.settings.rest || 90); },
   'cal-prev': () => shiftMonth(-1),
   'cal-next': () => shiftMonth(1),
@@ -1439,7 +1618,7 @@ const actions = {
     for (const t of p.treinos) {
       t.nome = String(t.nome || '').trim() || 'Treino ' + t.id;
       for (const e of t.exercicios) {
-        e.nome = String(e.nome || '').trim(); e.ordem = String(e.ordem || '').trim() || '•'; e.reps = String(e.reps || '').trim(); e.obs = String(e.obs || '').trim();
+        e.nome = String(e.nome || '').trim(); e.ordem = String(e.ordem || '').trim() || '•'; e.reps = String(e.reps || '').trim(); e.obs = String(e.obs || '').trim(); e.video = String(e.video || '').trim(); if (!e.video) delete e.video;
         if (!e.nome) { state.fichaT = t.id; render(); toast(`Dê um nome ao exercício sem nome do Treino ${t.id}.`); const el = document.getElementById('e-nome-' + e.id); if (el) el.focus(); return; }
       }
     }
@@ -1470,7 +1649,7 @@ const actions = {
     const data = JSON.stringify({ app: 'meus-treinos', versao: 1, exportadoEm: new Date().toISOString(), plan: state.plan, sessions: state.sessions, corpo: state.corpo }, null, 2);
     if (await offerFile(`meus-treinos-backup-${todayISO()}.json`, data, 'Backup pronto')) { LS.set('lastBackup', Date.now()); render(); }
   },
-  'timer-add': () => { timer.end = Math.max(timer.end, Date.now()) + 15000; timer.fired = false; $('#timer').classList.remove('over'); $('#timer-l').textContent = 'Descanso'; clearTimeout(timer.h); clearInterval(timer.h); tick(); timer.h = setInterval(tick, 250); },
+  'timer-add': () => { timer.end = Math.max(timer.end, Date.now()) + 15000; timer.fired = false; $('#timer').classList.remove('over'); $('#timer-l').textContent = 'Descanso'; clearTimeout(timer.h); clearInterval(timer.h); tick(); timer.h = setInterval(tick, 250); syncRestNotice(); },
   'timer-stop': () => stopTimer()
 };
 function bump(b, dir) {
@@ -1498,7 +1677,7 @@ document.addEventListener('click', e => {
   if (fn) { e.preventDefault(); fn(b, e); }
 });
 document.addEventListener('keydown', e => {
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('label[for="imp"]')) { e.preventDefault(); $('#imp').click(); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('label[for="imp"], label[for="v-cam"], label[for="v-file"]')) { e.preventDefault(); document.getElementById(e.target.getAttribute('for')).click(); }
 });
 document.addEventListener('input', e => {
   const el = e.target;
@@ -1542,8 +1721,18 @@ document.addEventListener('change', async e => {
   if (el.id === 's-rest') { state.settings.rest = +el.value; LS.set('settings', state.settings); return; }
   if (el.id === 's-auto') { state.settings.autoRest = el.checked; LS.set('settings', state.settings); return; }
   if (el.id === 's-som') { state.settings.som = el.value; LS.set('settings', state.settings); applyAudioSession(); if (el.value !== 'off') { primeAudio(); alarm(); } return; }
+  if (el.id === 's-notif') {
+    if (!el.checked) { state.settings.notif = false; LS.set('settings', state.settings); swPost({ type: 'rest-cancel' }); render(); return; }
+    if (notifState() === 'unsupported') { el.checked = false; toast(isStandalone() ? 'Este celular não permite avisos para este app.' : 'Abra o app pelo ícone da tela inicial para ativar os avisos.'); render(); return; }
+    let p = Notification.permission;
+    if (p === 'default') { try { p = await Notification.requestPermission(); } catch (e2) { p = 'denied'; } }
+    state.settings.notif = p === 'granted'; LS.set('settings', state.settings);
+    toast(p === 'granted' ? 'Pronto: você recebe um aviso quando o descanso acabar' : 'Sem permissão para avisos. Libere nas configurações do celular.');
+    render(); return;
+  }
   if (el.id === 's-tela') { state.settings.telaLigada = el.checked; LS.set('settings', state.settings); syncWakeLock(); return; }
   if (el.id === 's-step') { state.settings.step = +el.value; LS.set('settings', state.settings); return; }
+  if ((el.id === 'v-cam' || el.id === 'v-file') && el.files && el.files[0]) { const f = el.files[0]; el.value = ''; saveVideoFile(f); return; }
   if (el.id === 'imp') {
     const f = el.files && el.files[0]; el.value = ''; if (!f) return;
     let obj; try { obj = JSON.parse(await f.text()); } catch (_) { toast('Esse arquivo não é um backup válido.'); return; }
@@ -1574,6 +1763,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 
 readHash();
 if (state.draft && !location.hash) state.view = 'treino';
+VDB.keys().then(ks => { if (ks && ks.length) { state.vids = new Set(ks); render(); } }).catch(() => {});
 render();
 initStore();
 })();
