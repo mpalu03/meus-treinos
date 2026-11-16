@@ -255,6 +255,9 @@ video.own { display: block; width: 100%; max-height: 60vh; border-radius: 12px; 
 .vidbtn.has { background: var(--t-soft); border-color: var(--t); }
 .exrow .vidbtn { margin-top: 7px; }
 .vbox a.small { color: var(--accent); font-weight: 600; align-self: flex-start; }
+.ntfy { background: var(--surface-2); border-radius: 14px; padding: 12px; gap: 8px; }
+.ntfy ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.topic { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; user-select: all; }
 .vsec { border-top: 1px solid var(--line); padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
 .modal h3 { margin: 0; font-family: var(--font-display); text-transform: uppercase; font-size: 22px; font-weight: 600; }
 .modal p { color: var(--muted); }
@@ -504,7 +507,7 @@ function validPlan(p) {
 const state = {
   plan: normalizePlan(LS.get('plan', null)),
   sessions: Array.isArray(LS.get('sessions', null)) ? LS.get('sessions', []) : [],
-  settings: Object.assign({ rest: 90, autoRest: true, step: 2, som: 'normal', telaLigada: true }, LS.get('settings', {})),
+  settings: (st => { if (st.aviso == null) st.aviso = st.notif ? 'nav' : 'off'; return st; })(Object.assign({ rest: 90, autoRest: true, step: 2, som: 'normal', telaLigada: true }, LS.get('settings', {}))),
   draft: LS.get('draft', null),
   corpo: Array.isArray(LS.get('corpo', null)) ? LS.get('corpo', []) : [],
   calMonth: null,
@@ -982,8 +985,12 @@ function viewFicha() {
       <option value="off"${s.som === 'off' ? ' selected' : ''}>Desligado</option></select></label>
     <button type="button" class="btn sm" data-action="test-sound" style="align-self:flex-start">Testar som</button>
     <label class="toggle" for="s-tela"><input type="checkbox" id="s-tela"${s.telaLigada !== false ? ' checked' : ''}> Manter a tela ligada durante o treino</label>
-    <label class="toggle" for="s-notif"><input type="checkbox" id="s-notif"${s.notif && notifState() === 'granted' ? ' checked' : ''}> Avisar quando o descanso acabar, mesmo fora do app</label>
-    ${notifHint() ? `<p class="small muted" style="margin-top:-4px">${notifHint()}</p>` : ''}
+    <label class="field" for="s-aviso"><span>Aviso quando o descanso acabar, fora do app</span><select class="input" id="s-aviso">
+      <option value="off"${s.aviso === 'off' ? ' selected' : ''}>Desligado</option>
+      <option value="ntfy"${s.aviso === 'ntfy' ? ' selected' : ''}>App ntfy (iPhone e Android)</option>
+      <option value="nav"${s.aviso === 'nav' ? ' selected' : ''}>Notificação do navegador (Android)</option></select></label>
+    ${s.aviso === 'ntfy' ? ntfyCard() : ''}
+    ${s.aviso === 'nav' && notifHint() ? `<p class="small muted" style="margin-top:-4px">${notifHint()}</p>` : ''}
     <label class="field" for="s-step"><span>Passo dos botões − e + (kg)</span><select class="input" id="s-step">${[1, 2, 2.5, 5].map(v => `<option value="${v}"${+s.step === v ? ' selected' : ''}>${nf.format(v)} kg</option>`).join('')}</select></label>
   </div>
   <h3 class="sec">Backup</h3><div class="card stack">
@@ -1164,7 +1171,50 @@ function notifHint() {
   return '';
 }
 const restActive = () => !$('#timer').hidden && !timer.fired;
-const notifOn = () => !!state.settings.notif && notifState() === 'granted';
+const notifOn = () => state.settings.aviso === 'nav' && notifState() === 'granted';
+/* Aviso pelo app ntfy: agendado ao sair do app durante o descanso, cancelado ao voltar */
+const NTFY = 'https://ntfy.sh/';
+const ntfyOn = () => state.settings.aviso === 'ntfy' && !!state.settings.ntfyTopic;
+function newTopic() {
+  const a = new Uint8Array(14); try { crypto.getRandomValues(a); } catch (e) { for (let i = 0; i < a.length; i++) a[i] = Math.random() * 256; }
+  return 'axis-' + Array.from(a, b => (b % 36).toString(36)).join('');
+}
+function ntfyCard() {
+  const t = esc(state.settings.ntfyTopic || '');
+  return `<div class="ntfy stack">
+    <ol>
+      <li>Instale o app gratuito <b>ntfy</b> (App Store ou Google Play).</li>
+      <li>No ntfy, toque em <b>+</b> e inscreva-se neste tópico (deixe o servidor padrão, ntfy.sh):</li>
+    </ol>
+    <div class="row gap"><span class="topic" id="ntfy-topic">${t}</span><button type="button" class="btn sm" data-action="ntfy-copy">Copiar</button></div>
+    <ol start="3"><li>Toque em <b>Enviar teste</b> e veja se a notificação chega.</li></ol>
+    <button type="button" class="btn sm primary" data-action="ntfy-test" style="align-self:flex-start">Enviar teste</button>
+    <p class="small muted">Ao sair do app ou bloquear o celular durante o descanso, chega um aviso com o horário da próxima série e outro quando o tempo acabar (pode variar alguns segundos). Ao voltar para o app, os avisos são cancelados.</p>
+  </div>`;
+}
+function ntfyBeacon(path, params, body) {
+  const url = NTFY + path + '?' + new URLSearchParams(params).toString();
+  try { if (navigator.sendBeacon && navigator.sendBeacon(url, body)) return; } catch (e) { /* segue para fetch */ }
+  fetch(url, { method: 'POST', body, keepalive: true }).catch(() => {});
+}
+function ntfySchedule() {
+  const topic = state.settings.ntfyTopic, id = 'r' + Date.now().toString(36);
+  const left = Math.round((timer.end - Date.now()) / 1000);
+  const t = state.draft ? treinoById(state.draft.treino) : null;
+  const pend = [id + 's'];
+  ntfyBeacon(`${topic}/${id}s`, { title: 'Descansando', priority: '2', tags: 'stopwatch' }, `Próxima série às ${hhmmss(timer.end)}${t ? ' · Treino ' + t.id : ''}`);
+  if (left >= 3) {
+    pend.push(id + 'e');
+    ntfyBeacon(`${topic}/${id}e`, { title: 'Descanso acabou', priority: '5', tags: 'bell', delay: left >= 12 ? String(Math.round(timer.end / 1000)) : '10s' }, 'Hora da próxima série');
+  }
+  LS.set('ntfyPending', { topic, ids: pend });
+}
+function ntfyCancel() {
+  const p = LS.get('ntfyPending', null);
+  if (!p || !p.topic || !Array.isArray(p.ids)) return;
+  LS.set('ntfyPending', null);
+  p.ids.forEach(id => fetch(`${NTFY}${p.topic}/${id}`, { method: 'DELETE' }).catch(() => {}));
+}
 function swPost(msg) {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.ready.then(reg => { if (reg.active) reg.active.postMessage(msg); }).catch(() => {});
@@ -1175,7 +1225,10 @@ document.addEventListener('visibilitychange', () => {
   syncWakeLock();
   if (document.visibilityState === 'visible') {
     swPost({ type: 'rest-fg' });
+    ntfyCancel();
     if (!$('#timer').hidden) tick();
+  } else if (ntfyOn() && restActive()) {
+    ntfySchedule();
   } else if (notifOn() && restActive()) {
     swPost({ type: 'rest-bg', end: timer.end, body: `Próxima série às ${hhmmss(timer.end)}. Toque para voltar ao treino.` });
   }
@@ -1557,6 +1610,18 @@ const actions = {
     saveDraftSoon(); render();
   },
   'test-sound': () => { primeAudio(); alarm(); },
+  'ntfy-copy': async () => {
+    const t = state.settings.ntfyTopic || '';
+    try { await navigator.clipboard.writeText(t); toast('Tópico copiado'); }
+    catch (e) { const el = document.getElementById('ntfy-topic'); if (el) { const r = document.createRange(); r.selectNodeContents(el); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); } toast('Selecionei o tópico: toque em Copiar no menu do celular'); }
+  },
+  'ntfy-test': async () => {
+    const t = state.settings.ntfyTopic; if (!t) return;
+    try {
+      const r = await fetch(`${NTFY}${t}?` + new URLSearchParams({ title: 'ÁXIS', tags: 'white_check_mark' }), { method: 'POST', body: 'Teste: os avisos do descanso vão chegar aqui.' });
+      toast(r.ok ? 'Teste enviado. Chegou no app ntfy?' : 'O ntfy recusou o envio agora. Tente de novo em alguns minutos.');
+    } catch (e) { toast('Não consegui falar com o ntfy. Confira a internet.'); }
+  },
   video: b => openVideo(b.dataset.ex),
   'v-close': () => closeVideo(),
   'v-save-link': async () => {
@@ -1780,14 +1845,21 @@ document.addEventListener('change', async e => {
   if (el.id === 's-rest') { state.settings.rest = +el.value; LS.set('settings', state.settings); return; }
   if (el.id === 's-auto') { state.settings.autoRest = el.checked; LS.set('settings', state.settings); return; }
   if (el.id === 's-som') { state.settings.som = el.value; LS.set('settings', state.settings); applyAudioSession(); if (el.value !== 'off') { primeAudio(); alarm(); } return; }
-  if (el.id === 's-notif') {
-    if (!el.checked) { state.settings.notif = false; LS.set('settings', state.settings); swPost({ type: 'rest-cancel' }); render(); return; }
-    if (notifState() === 'unsupported') { el.checked = false; toast(isStandalone() ? 'Este celular não permite avisos para este app.' : 'Abra o app pelo ícone da tela inicial para ativar os avisos.'); render(); return; }
-    let p = Notification.permission;
-    if (p === 'default') { try { p = await Notification.requestPermission(); } catch (e2) { p = 'denied'; } }
-    state.settings.notif = p === 'granted'; LS.set('settings', state.settings);
-    toast(p === 'granted' ? 'Pronto: você recebe um aviso quando o descanso acabar' : 'Sem permissão para avisos. Libere nas configurações do celular.');
-    render(); return;
+  if (el.id === 's-aviso') {
+    let v = el.value;
+    if (v === 'nav') {
+      if (notifState() === 'unsupported') { v = 'off'; toast(isStandalone() ? 'Este celular não permite avisos do navegador. Use a opção pelo app ntfy.' : 'Abra o app pelo ícone da tela inicial, ou use a opção pelo app ntfy.'); }
+      else {
+        let p = Notification.permission;
+        if (p === 'default') { try { p = await Notification.requestPermission(); } catch (e2) { p = 'denied'; } }
+        if (p !== 'granted') { v = 'off'; toast('Sem permissão para avisos. Libere nas configurações do celular ou use o app ntfy.'); }
+        else toast('Pronto: você recebe uma notificação quando o descanso acabar');
+      }
+    }
+    if (v === 'ntfy' && !state.settings.ntfyTopic) state.settings.ntfyTopic = newTopic();
+    if (v !== 'nav') swPost({ type: 'rest-cancel' });
+    state.settings.aviso = v; state.settings.notif = v === 'nav';
+    LS.set('settings', state.settings); render(); return;
   }
   if (el.id === 's-tela') { state.settings.telaLigada = el.checked; LS.set('settings', state.settings); syncWakeLock(); return; }
   if (el.id === 's-step') { state.settings.step = +el.value; LS.set('settings', state.settings); return; }
@@ -1822,6 +1894,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 
 readHash();
 if (state.draft && !location.hash) state.view = 'treino';
+ntfyCancel();
 VDB.keys().then(ks => { if (ks && ks.length) { state.vids = new Set(ks); render(); } }).catch(() => {});
 render();
 initStore();
