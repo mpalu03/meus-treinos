@@ -1,5 +1,5 @@
-/* Meus Treinos: funciona sem internet depois da primeira abertura */
-const VERSION = 'meus-treinos-v5';
+/* ÁXIS: funciona sem internet depois da primeira abertura */
+const VERSION = 'axis-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -10,13 +10,11 @@ const ASSETS = [
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
   './icons/favicon-32.png',
-  './fonts/barlow-latin-400-normal.woff2',
-  './fonts/barlow-latin-500-normal.woff2',
-  './fonts/barlow-latin-600-normal.woff2',
-  './fonts/barlow-latin-700-normal.woff2',
-  './fonts/barlow-condensed-latin-500-normal.woff2',
-  './fonts/barlow-condensed-latin-600-normal.woff2',
-  './fonts/barlow-condensed-latin-700-normal.woff2'
+  './fonts/cormorant-garamond-latin-500-normal.woff2',
+  './fonts/cormorant-garamond-latin-600-normal.woff2',
+  './fonts/jost-latin-400-normal.woff2',
+  './fonts/jost-latin-500-normal.woff2',
+  './fonts/jost-latin-600-normal.woff2'
 ];
 
 self.addEventListener('install', event => {

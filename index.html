@@ -3,66 +3,69 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Meus Treinos</title>
+<title>ÁXIS</title>
 <meta name="description" content="Ficha de treino com registro de cargas, descanso e evolução em PDF.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Meus Treinos">
+<meta name="apple-mobile-web-app-title" content="ÁXIS">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#eceff4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0d1015" media="(prefers-color-scheme: dark)">
-<link rel="preload" href="fonts/barlow-condensed-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/barlow-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141715" media="(prefers-color-scheme: dark)">
+<link rel="preload" href="fonts/cormorant-garamond-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/jost-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-@font-face { font-family: "Barlow"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/barlow-latin-400-normal.woff2") format("woff2"); }
-@font-face { font-family: "Barlow"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/barlow-latin-500-normal.woff2") format("woff2"); }
-@font-face { font-family: "Barlow"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/barlow-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "Barlow"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/barlow-latin-700-normal.woff2") format("woff2"); }
-@font-face { font-family: "Barlow Condensed"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/barlow-condensed-latin-500-normal.woff2") format("woff2"); }
-@font-face { font-family: "Barlow Condensed"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "Barlow Condensed"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Cormorant Garamond"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/cormorant-garamond-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Cormorant Garamond"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/cormorant-garamond-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Jost"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/jost-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Jost"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/jost-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Jost"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/jost-latin-600-normal.woff2") format("woff2"); }
+/* ÁXIS: creme, verde-sálvia e filete dourado, como no logo; serifa clássica para nome e títulos, sans geométrica espaçada para rótulos */
 :root {
-  /* Layout: coluna única pensada para celular, abas fixas embaixo; cada treino usa a cor do marca-texto da ficha (A rosa, B amarelo, C verde, D laranja) */
-  --bg: #eceff4;
-  --surface: #ffffff;
-  --surface-2: #f4f6f9;
-  --ink: #141820;
-  --muted: #5a6272;
-  --line: #d9dee7;
-  --accent: #1f45d1;
-  --accent-ink: #ffffff;
-  --good: #1d8a4b;
-  --bad: #c0352e;
-  --tA: #d43a73; --tA-soft: #fbe2eb; --tA-on: #ffffff;
-  --tB: #b98700; --tB-soft: #fbf0c8; --tB-on: #1f1700;
-  --tC: #24945a; --tC-soft: #dcf2e4; --tC-on: #ffffff;
-  --tD: #dd6418; --tD-soft: #fde4d3; --tD-on: #ffffff;
-  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
-  --font-body: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --radius: 14px;
+  /* Layout: coluna única para celular, abas fixas embaixo; cada treino mantém a sua cor (A rosé, B ocre, C sálvia, D terracota) em tons suaves */
+  --bg: #f6f3ee;
+  --surface: #fffdf9;
+  --surface-2: #f1ece4;
+  --ink: #2e3631;
+  --muted: #747b75;
+  --line: #e3dcd0;
+  --accent: #5f6d63;
+  --accent-ink: #fffdf9;
+  --gold: #b49a6a;
+  --gold-soft: #f2e9d8;
+  --gold-ink: #7f6738;
+  --good: #4f8560;
+  --bad: #b4513e;
+  --tA: #b76e7c; --tA-soft: #f5e5e8; --tA-on: #ffffff;
+  --tB: #a98536; --tB-soft: #f4ead3; --tB-on: #ffffff;
+  --tC: #5e8c6a; --tC-soft: #e2eee4; --tC-on: #ffffff;
+  --tD: #bf7650; --tD-soft: #f6e6dc; --tD-on: #ffffff;
+  --font-display: "Cormorant Garamond", "Cormorant", Georgia, "Times New Roman", serif;
+  --font-body: "Jost", "Futura", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-num: "Jost", "Futura", system-ui, -apple-system, sans-serif;
+  --radius: 18px;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0d1015; --surface: #161a21; --surface-2: #1d222b; --ink: #ebeef3; --muted: #98a1b1; --line: #2a303b;
-    --accent: #7d97ff; --accent-ink: #0d1015; --good: #4fc583; --bad: #ff6d63;
-    --tA: #ff6fa0; --tA-soft: #3a1b28; --tA-on: #2a0815;
-    --tB: #f0c232; --tB-soft: #33290d; --tB-on: #221800;
-    --tC: #4fc583; --tC-soft: #15301f; --tC-on: #05200f;
-    --tD: #ff9b55; --tD-soft: #3a2312; --tD-on: #2a1102;
+    --bg: #141715; --surface: #1c201d; --surface-2: #242925; --ink: #ece7dd; --muted: #a0a59e; --line: #333a34;
+    --accent: #a9b8ab; --accent-ink: #141715; --gold: #cdb282; --gold-soft: #3a3223; --gold-ink: #e3cb9b; --good: #7dba8c; --bad: #e3846f;
+    --tA: #e3a0ac; --tA-soft: #3a2529; --tA-on: #2a1015;
+    --tB: #d9b871; --tB-soft: #383020; --tB-on: #241a06;
+    --tC: #8fc09b; --tC-soft: #1f3125; --tC-on: #0e2014;
+    --tD: #e6a07c; --tD-soft: #3b2a20; --tD-on: #2b1408;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0d1015; --surface: #161a21; --surface-2: #1d222b; --ink: #ebeef3; --muted: #98a1b1; --line: #2a303b;
-  --accent: #7d97ff; --accent-ink: #0d1015; --good: #4fc583; --bad: #ff6d63;
-  --tA: #ff6fa0; --tA-soft: #3a1b28; --tA-on: #2a0815;
-  --tB: #f0c232; --tB-soft: #33290d; --tB-on: #221800;
-  --tC: #4fc583; --tC-soft: #15301f; --tC-on: #05200f;
-  --tD: #ff9b55; --tD-soft: #3a2312; --tD-on: #2a1102;
+  --bg: #141715; --surface: #1c201d; --surface-2: #242925; --ink: #ece7dd; --muted: #a0a59e; --line: #333a34;
+  --accent: #a9b8ab; --accent-ink: #141715; --gold: #cdb282; --gold-soft: #3a3223; --gold-ink: #e3cb9b; --good: #7dba8c; --bad: #e3846f;
+  --tA: #e3a0ac; --tA-soft: #3a2529; --tA-on: #2a1015;
+  --tB: #d9b871; --tB-soft: #383020; --tB-on: #241a06;
+  --tC: #8fc09b; --tC-soft: #1f3125; --tC-on: #0e2014;
+  --tD: #e6a07c; --tD-soft: #3b2a20; --tD-on: #2b1408;
   color-scheme: dark;
 }
 
@@ -295,12 +298,64 @@ video.own { display: block; width: 100%; max-height: 60vh; border-radius: 12px; 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+/* ---------- ÁXIS: acabamento ---------- */
+.brand { display: inline-flex; flex-direction: column; align-items: stretch; gap: 6px; }
+.brand-name { font-family: var(--font-display); font-weight: 600; font-size: 36px; line-height: .85; letter-spacing: .09em; color: var(--accent); }
+.brand-rule { height: 1px; background: var(--gold); }
+.brand-sub { font-family: var(--font-body); font-size: 9.5px; font-weight: 500; letter-spacing: .34em; color: var(--gold); line-height: 1; }
+header.top { margin-bottom: 18px; }
+h3.sec { font-family: var(--font-body); font-size: 11px; font-weight: 500; letter-spacing: .26em; color: var(--gold); }
+.card, .exrow, .excard, .hcard, .edrow, .srow { border-radius: var(--radius); }
+.card, .exrow, .excard, .hcard { box-shadow: 0 1px 2px rgba(70, 60, 40, .05); }
+.btn { border-radius: 999px; font-weight: 500; }
+.btn.big { font-family: var(--font-body); font-size: 14.5px; font-weight: 500; letter-spacing: .22em; min-height: 54px; }
+.btn.primary { box-shadow: 0 8px 20px -12px rgba(60, 75, 62, .7); }
+.btn.sm { border-radius: 999px; }
+.chip { border-radius: 16px; border-width: 1px; }
+.chip .l { font-weight: 600; font-size: 31px; }
+.chip .n { font-size: 11px; letter-spacing: .02em; }
+.thead { border-left: 0; box-shadow: inset 3px 0 0 var(--t), 0 1px 2px rgba(70, 60, 40, .05); }
+.thead .big { font-weight: 600; font-size: 54px; width: 40px; }
+.thead h2, .dtitle, .calhead h2, .empty h2, .modal h3 { font-weight: 600; letter-spacing: .05em; }
+.thead h2 { font-size: 27px; }
+.kicker { font-family: var(--font-body); font-weight: 500; letter-spacing: .22em; font-size: 10.5px; }
+.ord, .presc, .last b, .cinput, .setdot, .stat b, .sval b, .timer .tt, .calday { font-family: var(--font-num); }
+.ord { font-size: 12.5px; font-weight: 500; border-radius: 999px; min-width: 28px; height: 28px; }
+.presc { font-size: 14px; letter-spacing: .03em; }
+.exname { font-weight: 500; }
+.last b { font-size: 18px; font-weight: 500; }
+.cinput { font-size: 22px; font-weight: 500; border-radius: 14px; border-width: 1px; }
+.cinput.sm { font-size: 19px; }
+.step { border-radius: 999px; border-width: 1px; font-weight: 400; }
+.setdot { font-size: 15px; font-weight: 500; border-width: 1.5px; }
+.stat { border-radius: 14px; }
+.stat b { font-size: 19px; font-weight: 500; }
+.stat small, .sets .lbl, .plbl, table.t th { letter-spacing: .16em; font-weight: 500; font-size: 10.5px; }
+.sval b { font-size: 17px; font-weight: 500; }
+.input { border-width: 1px; border-radius: 12px; }
+.hl { border-radius: 999px; font-family: var(--font-display); font-size: 22px; }
+.calb { border-radius: 999px; font-family: var(--font-num); font-size: 11px; font-weight: 600; }
+.calday.today { border-color: var(--gold); }
+.wbars span { height: 6px; }
+.wbars span.on { background: var(--accent); }
+.tag { border-color: var(--gold); background: var(--gold-soft); color: var(--gold-ink); font-weight: 500; letter-spacing: .06em; }
+.pill { background: var(--gold-soft); color: var(--gold-ink); }
+.timer { background: var(--accent); color: var(--accent-ink); }
+.timer .tt { font-size: 24px; font-weight: 500; }
+.timer.over { background: var(--gold); color: #fff; }
+.toast { background: var(--accent); color: var(--accent-ink); }
+.vidbtn { font-weight: 500; letter-spacing: .02em; border-width: 1px; }
+.seg { border-radius: 999px; }
+.seg button { border-radius: 999px; font-weight: 500; }
+nav.tabs { background: color-mix(in srgb, var(--surface) 90%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+nav.tabs a { font-weight: 500; letter-spacing: .04em; border-radius: 999px; }
+.empty h2 { font-size: 26px; }
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top">
-    <h1>Meus Treinos</h1>
+    <h1 class="brand"><span class="brand-name">ÁXIS</span><span class="brand-rule" aria-hidden="true"></span><span class="brand-sub">Meus treinos</span></h1>
     <div class="sync" id="sync" role="status"><span class="dot"></span><span id="sync-t">Salvo neste celular</span></div>
   </header>
   <main id="view"></main>
@@ -379,7 +434,8 @@ function defaultPlan() {
     ]
   };
 }
-const PDF_RGB = { A: [212, 58, 115], B: [185, 135, 0], C: [36, 148, 90], D: [221, 100, 24] };
+const PDF_RGB = { A: [183, 110, 124], B: [169, 133, 54], C: [94, 140, 106], D: [191, 118, 80] };
+const PDF_SAGE = [95, 109, 99], PDF_GOLD = [180, 154, 106];
 
 /* ---------- Utilidades ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -1104,7 +1160,7 @@ function notifState() { return ('Notification' in window && 'serviceWorker' in n
 function notifHint() {
   const st = notifState();
   if (st === 'unsupported') return isStandalone() ? 'Este celular não permite avisos para este app.' : 'Para ativar, abra o app pelo ícone da tela inicial.';
-  if (st === 'denied') return 'Os avisos estão bloqueados. Libere em Ajustes do celular → Notificações → Meus Treinos.';
+  if (st === 'denied') return 'Os avisos estão bloqueados. Libere em Ajustes do celular → Notificações → ÁXIS.';
   return '';
 }
 const restActive = () => !$('#timer').hidden && !timer.fired;
@@ -1171,20 +1227,23 @@ function daysSinceBackup() { const t = LS.get('lastBackup', 0); return t ? Math.
 
 /* ---------- PDF ---------- */
 function pdfHeader(doc, title, subtitle) {
-  doc.setFillColor(20, 24, 32); doc.rect(0, 0, 210, 30, 'F');
-  doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(19); doc.text(title, 16, 15);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(190, 196, 208); doc.text(subtitle, 16, 22.5);
-  return 40;
+  doc.setFillColor(246, 243, 238); doc.rect(0, 0, 210, 34, 'F');
+  doc.setDrawColor(...PDF_GOLD); doc.setLineWidth(0.4); doc.line(16, 34, 194, 34);
+  doc.setTextColor(...PDF_SAGE); doc.setFont('times', 'normal'); doc.setFontSize(15); doc.text('ÁXIS', 194, 15, { align: 'right', charSpace: 1.4 });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...PDF_GOLD); doc.text('MEUS TREINOS', 194, 20.5, { align: 'right', charSpace: 1.1 });
+  doc.setTextColor(46, 54, 49); doc.setFont('times', 'bold'); doc.setFontSize(21); doc.text(title, 16, 16);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(116, 123, 117); doc.text(subtitle, 16, 24);
+  return 44;
 }
 function pdfFooter(doc) {
   const n = doc.getNumberOfPages();
   for (let i = 1; i <= n; i++) {
     doc.setPage(i); doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(140, 146, 158);
-    doc.text('Meus Treinos', 16, 289); doc.text(`Página ${i} de ${n}`, 194, 289, { align: 'right' });
+    doc.text('ÁXIS · Meus treinos', 16, 289); doc.text(`Página ${i} de ${n}`, 194, 289, { align: 'right' });
   }
 }
 function pdfTag(doc, t, x, y) {
-  const rgb = PDF_RGB[t.id] || [31, 69, 209];
+  const rgb = PDF_RGB[t.id] || PDF_SAGE;
   doc.setFillColor(...rgb); doc.roundedRect(x, y, 8, 8, 1.6, 1.6, 'F');
   doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.text(t.id, x + 4, y + 5.7, { align: 'center' });
   doc.setTextColor(70, 76, 90); doc.setFontSize(10.5); doc.text(`Treino ${t.id} · ${t.nome}`, x + 11, y + 5.6);
@@ -1196,7 +1255,7 @@ function pdfStats(doc, st, unit, x, y, w, h) {
     const bx = x + i * (bw + gap);
     doc.setFillColor(242, 244, 247); doc.roundedRect(bx, y, bw, h, 2, 2, 'F');
     doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(110, 116, 128); doc.text(k.toUpperCase(), bx + 3, y + 5);
-    if (k === 'Variação' && st.pct != null && st.pct !== 0) doc.setTextColor(...(st.pct > 0 ? [29, 138, 75] : [192, 53, 46])); else doc.setTextColor(20, 24, 32);
+    if (k === 'Variação' && st.pct != null && st.pct !== 0) doc.setTextColor(...(st.pct > 0 ? [29, 138, 75] : [192, 53, 46])); else doc.setTextColor(46, 54, 49);
     doc.setFontSize(h > 14 ? 13 : 11); doc.text(v, bx + 3, y + h - 3.6);
   });
   return y + h;
@@ -1220,7 +1279,7 @@ function pdfChart(doc, pts, unit, rgb, x, y, w, h) {
   P.forEach((p, i) => { if (i < P.length - 1) doc.circle(p[0], p[1], 0.9, 'F'); });
   const L = P[P.length - 1];
   doc.setDrawColor(255, 255, 255); doc.setLineWidth(0.6); doc.circle(L[0], L[1], 1.7, 'FD');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(20, 24, 32);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(46, 54, 49);
   const al = L[0] > x + w - 18 ? 'right' : L[0] < x + pad.l + 12 ? 'left' : 'center';
   doc.text(fmtCarga(pts[pts.length - 1].v, unit), al === 'right' ? L[0] + 2 : al === 'left' ? L[0] - 2 : L[0], Math.max(y + 4, L[1] - 3.5), { align: al });
   doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(120, 126, 138);
@@ -1232,10 +1291,10 @@ function pdfChart(doc, pts, unit, rgb, x, y, w, h) {
 function buildPdfExercise(t, e) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const pts = seriesOf(e.id), st = statsOf(pts), rgb = PDF_RGB[t.id] || [31, 69, 209];
+  const pts = seriesOf(e.id), st = statsOf(pts), rgb = PDF_RGB[t.id] || PDF_SAGE;
   let y = pdfHeader(doc, 'Evolução de carga', `Gerado em ${fmtDMY(todayISO())} · ${pts.length} registros de ${fmtDMY(pts[0].data)} a ${fmtDMY(pts[pts.length - 1].data)}`);
   pdfTag(doc, t, 16, y); y += 17;
-  doc.setTextColor(20, 24, 32); doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.text(e.nome, 16, y); y += 7;
+  doc.setTextColor(46, 54, 49); doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.text(e.nome, 16, y); y += 7;
   doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5); doc.setTextColor(90, 98, 114);
   const sub = doc.splitTextToSize(`${presc(e)} · carga em ${unitLabel(e.unidade)}${e.obs ? ' · ' + e.obs : ''}`, 178);
   doc.text(sub, 16, y); y += sub.length * 4.8 + 4;
@@ -1246,13 +1305,13 @@ function buildPdfExercise(t, e) {
     doc.text('DATA', 16, y); doc.text('CARGA', 74, y, { align: 'right' }); doc.text('SÉRIES', 98, y, { align: 'right' }); doc.text('OBSERVAÇÃO', 106, y);
     y += 2; doc.setDrawColor(222, 226, 233); doc.setLineWidth(0.2); doc.line(16, y, 194, y); y += 5;
   };
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(20, 24, 32); doc.text('Registros', 16, y); y += 7;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(46, 54, 49); doc.text('Registros', 16, y); y += 7;
   head();
   pts.forEach(p => {
     const obs = doc.splitTextToSize([p.cargas ? 'Por série: ' + fmtSets(p.cargas) : '', p.obs || ''].filter(Boolean).join(' · '), 88);
     const rh = Math.max(6.5, obs.length * 4 + 2.5);
     if (y + rh > 280) { doc.addPage(); y = 20; head(); }
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(20, 24, 32);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(46, 54, 49);
     doc.text(fmtDMY(p.data), 16, y); doc.text(fmtCarga(p.v, e.unidade), 74, y, { align: 'right' });
     doc.text(`${p.feitas}/${p.total || Math.max(p.feitas, nSeries(e))}`, 98, y, { align: 'right' });
     doc.setTextColor(90, 98, 114); if (obs.length && obs[0]) doc.text(obs, 106, y);
@@ -1269,10 +1328,10 @@ function buildPdfAll() {
   const BLOCK = 60;
   const cp = corpoPts();
   if (cp.length) {
-    doc.setFillColor(31, 69, 209); doc.roundedRect(16, y, 8, 8, 1.6, 1.6, 'F');
+    doc.setFillColor(...PDF_SAGE); doc.roundedRect(16, y, 8, 8, 1.6, 1.6, 'F');
     doc.setTextColor(70, 76, 90); doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5); doc.text('Peso corporal', 27, y + 5.6); y += 14;
     y = pdfBoxes(doc, corpoBoxes(cp), 16, y, 178, 12.5) + 2;
-    pdfChart(doc, cp, 'kg', [31, 69, 209], 16, y, 178, 37); y += 46;
+    pdfChart(doc, cp, 'kg', PDF_SAGE, 16, y, 178, 37); y += 46;
   }
   for (const t of state.plan.treinos) {
     const list = t.exercicios.map(e => ({ e, pts: seriesOf(e.id) })).filter(x => x.pts.length);
@@ -1281,8 +1340,8 @@ function buildPdfAll() {
     pdfTag(doc, t, 16, y); y += 14;
     for (const { e, pts } of list) {
       if (y + BLOCK > 281) { doc.addPage(); y = 20; }
-      const st = statsOf(pts), rgb = PDF_RGB[t.id] || [31, 69, 209];
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.setTextColor(20, 24, 32); doc.text(`${e.ordem} · ${e.nome}`, 16, y);
+      const st = statsOf(pts), rgb = PDF_RGB[t.id] || PDF_SAGE;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.setTextColor(46, 54, 49); doc.text(`${e.ordem} · ${e.nome}`, 16, y);
       doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(110, 116, 128);
       doc.text(`${presc(e)} · ${pts.length} ${pts.length === 1 ? 'registro' : 'registros'}`, 194, y, { align: 'right' });
       y += 3.5;
@@ -1301,7 +1360,7 @@ function pdfBoxes(doc, items, x, y, w, h) {
     const bx = x + i * (bw + gap);
     doc.setFillColor(242, 244, 247); doc.roundedRect(bx, y, bw, h, 2, 2, 'F');
     doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(110, 116, 128); doc.text(k.toUpperCase(), bx + 3, y + 5);
-    doc.setTextColor(20, 24, 32); doc.setFontSize(h > 14 ? 13 : 11); doc.text(String(v), bx + 3, y + h - 3.6);
+    doc.setTextColor(46, 54, 49); doc.setFontSize(h > 14 ? 13 : 11); doc.text(String(v), bx + 3, y + h - 3.6);
   });
   return y + h;
 }
@@ -1311,18 +1370,18 @@ function buildPdfCorpo() {
   const cp = corpoPts(), rows = corpoSorted();
   let y = pdfHeader(doc, 'Peso corporal', `Gerado em ${fmtDMY(todayISO())} · ${cp.length} registros de ${fmtDMY(cp[0].data)} a ${fmtDMY(cp[cp.length - 1].data)}`);
   y = pdfBoxes(doc, corpoBoxes(cp), 16, y, 178, 17) + 6;
-  pdfChart(doc, cp, 'kg', [31, 69, 209], 16, y, 178, 82); y += 92;
+  pdfChart(doc, cp, 'kg', PDF_SAGE, 16, y, 178, 82); y += 92;
   const head = () => {
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(110, 116, 128);
     doc.text('DATA', 16, y); doc.text('PESO', 74, y, { align: 'right' }); doc.text('DIFERENÇA', 110, y, { align: 'right' });
     y += 2; doc.setDrawColor(222, 226, 233); doc.setLineWidth(0.2); doc.line(16, y, 194, y); y += 5;
   };
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(20, 24, 32); doc.text('Registros', 16, y); y += 7;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(46, 54, 49); doc.text('Registros', 16, y); y += 7;
   head();
   rows.forEach((x, i) => {
     if (y + 6.5 > 280) { doc.addPage(); y = 20; head(); }
     const prev = rows[i - 1], dd = prev ? Math.round((x.kg - prev.kg) * 10) / 10 : null;
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(20, 24, 32);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(46, 54, 49);
     doc.text(fmtDMY(x.data), 16, y); doc.text(fmtCarga(x.kg), 74, y, { align: 'right' });
     doc.setTextColor(90, 98, 114); doc.text(dd == null ? '-' : `${dd > 0 ? '+' : ''}${nf.format(dd)} kg`, 110, y, { align: 'right' });
     y += 3; doc.setDrawColor(236, 238, 242); doc.line(16, y, 194, y); y += 4.5;
@@ -1343,7 +1402,7 @@ function exportCsv() {
   }
   for (const x of corpoSorted()) rows.push([x.data, '', 'Peso corporal', 'Peso corporal', '', '', num(x.kg), '', 'kg', '', '', '']);
   if (rows.length === 1) { toast('Ainda não há registros para exportar.'); return; }
-  return offerFile(`meus-treinos-${todayISO()}.csv`, '﻿' + rows.map(r => r.map(q).join(';')).join('\r\n'), 'Planilha pronta');
+  return offerFile(`axis-treinos-${todayISO()}.csv`, '﻿' + rows.map(r => r.map(q).join(';')).join('\r\n'), 'Planilha pronta');
 }
 async function exportPdf(kind) {
   if (!window.jspdf || !window.jspdf.jsPDF) { toast('O gerador de PDF não carregou. Confira a internet e recarregue o app.'); return; }
@@ -1647,7 +1706,7 @@ const actions = {
   },
   backup: async () => {
     const data = JSON.stringify({ app: 'meus-treinos', versao: 1, exportadoEm: new Date().toISOString(), plan: state.plan, sessions: state.sessions, corpo: state.corpo }, null, 2);
-    if (await offerFile(`meus-treinos-backup-${todayISO()}.json`, data, 'Backup pronto')) { LS.set('lastBackup', Date.now()); render(); }
+    if (await offerFile(`axis-backup-${todayISO()}.json`, data, 'Backup pronto')) { LS.set('lastBackup', Date.now()); render(); }
   },
   'timer-add': () => { timer.end = Math.max(timer.end, Date.now()) + 15000; timer.fired = false; $('#timer').classList.remove('over'); $('#timer-l').textContent = 'Descanso'; clearTimeout(timer.h); clearInterval(timer.h); tick(); timer.h = setInterval(tick, 250); syncRestNotice(); },
   'timer-stop': () => stopTimer()
@@ -1736,7 +1795,7 @@ document.addEventListener('change', async e => {
   if (el.id === 'imp') {
     const f = el.files && el.files[0]; el.value = ''; if (!f) return;
     let obj; try { obj = JSON.parse(await f.text()); } catch (_) { toast('Esse arquivo não é um backup válido.'); return; }
-    if (!obj || !validPlan(obj.plan) || !Array.isArray(obj.sessions)) { toast('Esse arquivo não é um backup do Meus Treinos.'); return; }
+    if (!obj || !validPlan(obj.plan) || !Array.isArray(obj.sessions)) { toast('Esse arquivo não é um backup do app ÁXIS.'); return; }
     const sess = obj.sessions.filter(s => s && typeof s.treino === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s.data || ''));
     if (!await ask('Importar backup?', `A ficha e ${sess.length} treinos do arquivo vão substituir os registros iguais que já estão aqui.`, 'Importar')) return;
     state.plan = normalizePlan(obj.plan); await persistPlan();

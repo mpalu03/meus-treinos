@@ -1,6 +1,6 @@
-# Meus Treinos
+# ÁXIS · Meus treinos
 
-App de treino para celular (PWA): ficha com os treinos A, B, C e D, registro de carga por série, cronômetro de descanso, histórico e gráfico de evolução com exportação em PDF.
+App de treino para celular (PWA): ficha com os treinos A, B, C e D, registro de carga por série, cronômetro de descanso com aviso, vídeos de execução, calendário, recordes, peso corporal e evolução em PDF.
 
 Acesse: https://mpalu03.github.io/meus-treinos/
 
@@ -23,7 +23,7 @@ Os treinos ficam salvos no próprio celular (armazenamento do navegador), nunca 
 | `sw.js` | Service worker: guarda o app para uso offline |
 | `manifest.webmanifest` | Nome, cores e ícones do app instalado |
 | `vendor/jspdf.umd.min.js` | jsPDF 2.5.1, gera os PDFs de evolução |
-| `fonts/` | Barlow e Barlow Condensed (SIL Open Font License) |
+| `fonts/` | Cormorant Garamond e Jost (SIL Open Font License) |
 | `icons/` | Ícones do app |
 
 Ao alterar arquivos fixos (fontes, ícones, jsPDF), troque `VERSION` em `sw.js` para os celulares baixarem a versão nova.
