@@ -24,6 +24,20 @@ Login e sincronização usam o [Supabase](https://supabase.com) (projeto `qlksnt
 - `config.js` tem só a URL e a chave **publicável** do projeto, feitas para ficar no app. A chave secreta (service_role) nunca entra aqui.
 - Sem `config.js`, o app volta ao modo antigo: tudo salvo só no celular.
 
+### Aviso do fim do descanso (notificação)
+
+Com o app fechado ou o celular bloqueado, o celular pausa o app e o cronômetro dele para. Por isso o aviso vem do servidor:
+
+1. Ao começar o descanso, o app agenda um aviso na tabela `avisos` (o horário é calculado pelo relógio do servidor).
+2. A cada 2 segundos, um job do banco (`pg_cron`) procura avisos vencidos e chama a função `descanso` (`pg_net`).
+3. A função envia a notificação (Web Push) para o celular que agendou.
+
+Se o app estiver na tela perto do fim, o aviso é cancelado e quem toca é o alarme do próprio app. Ao sair do app durante o descanso, o aviso é reenviado por `sendBeacon`, caso ainda não exista.
+
+- No iPhone, precisa do iOS 16.4 ou mais novo e do app aberto pelo ícone da tela inicial.
+- A chave privada de envio (VAPID) foi gerada dentro do Supabase e fica no Vault (`axis_vapid`). No app e na função vai só a chave pública.
+- Arquivos: `supabase/avisos.sql` (tabelas, regras e jobs) e `supabase/functions/descanso/` (envio).
+
 Configuração no painel do Supabase: **Authentication → URL Configuration → Site URL** = `https://mpalu03.github.io/meus-treinos/`.
 
 ## Estrutura
@@ -35,6 +49,8 @@ Configuração no painel do Supabase: **Authentication → URL Configuration →
 | `manifest.webmanifest` | Nome, cores e ícones do app instalado |
 | `config.js` | Endereço e chave publicável do Supabase |
 | `supabase/schema.sql` | Tabelas, regras de acesso (RLS) e funções do banco |
+| `supabase/avisos.sql` | Notificação de fim do descanso: inscrições, avisos e jobs |
+| `supabase/functions/descanso/` | Função que envia as notificações (Web Push, sem dependências) |
 | `vendor/supabase-2.118.0.js` | supabase-js 2.118.0 (login e banco) |
 | `vendor/jspdf.umd.min.js` | jsPDF 2.5.1, gera os PDFs de evolução |
 | `fonts/` | Cormorant Garamond e Jost (SIL Open Font License) |

@@ -1,5 +1,5 @@
 /* ÁXIS: funciona sem internet depois da primeira abertura */
-const VERSION = 'axis-v8';
+const VERSION = 'axis-v9';
 const ASSETS = [
   './',
   './index.html',
@@ -94,8 +94,17 @@ self.addEventListener('message', event => {
       timestamp: d.end || Date.now(), data: { url: './#treino' }
     }));
   } else if (d.type === 'rest-fg') {
-    event.waitUntil(closeTag('rest-live').then(() => closeTag('rest-end')));
+    event.waitUntil(closeTag('rest-live').then(() => closeTag('rest-end')).then(() => closeTag('descanso')));
   }
+});
+/* Notificação enviada pelo servidor (fim do descanso, teste) */
+self.addEventListener('push', event => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = { corpo: event.data ? event.data.text() : '' }; }
+  event.waitUntil(closeTag('rest-live').then(() => self.registration.showNotification(d.titulo || 'ÁXIS', {
+    body: d.corpo || '', tag: d.tag || 'descanso', renotify: true,
+    vibrate: [300, 120, 300, 120, 500], icon: ICON, badge: ICON, data: { url: d.url || './#treino' }
+  })));
 });
 self.addEventListener('notificationclick', event => {
   event.notification.close();

@@ -725,7 +725,7 @@ function viewTreino() {
   const t = treinoById(state.sel) || treinoById(sug) || state.plan.treinos[0];
   const ls = lastSessionOf(t.id);
   return `
-  ${isCloud() ? migrationCard() : ''}${weekCard()}
+  ${isCloud() ? migrationCard() + pushNudge() : ''}${weekCard()}
   ${chips(t.id, 'pick')}
   <div class="card thead" style="${tv(t.id)}">
     <div class="big" aria-hidden="true">${esc(t.id)}</div>
@@ -1051,10 +1051,8 @@ function viewFicha() {
     <button type="button" class="btn sm" data-action="test-sound" style="align-self:flex-start">Testar som</button>
     <label class="toggle" for="s-tela"><input type="checkbox" id="s-tela"${s.telaLigada !== false ? ' checked' : ''}> Manter a tela ligada durante o treino</label>
     <label class="field" for="s-aviso"><span>Aviso quando o descanso acabar, fora do app</span><select class="input" id="s-aviso">
-      <option value="off"${s.aviso === 'off' ? ' selected' : ''}>Desligado</option>
-      <option value="ntfy"${s.aviso === 'ntfy' ? ' selected' : ''}>App ntfy (iPhone e Android)</option>
-      <option value="nav"${s.aviso === 'nav' ? ' selected' : ''}>Notificação do navegador (Android)</option></select></label>
-    ${s.aviso === 'ntfy' ? ntfyCard() : ''}
+      ${avisoOptions(s)}</select></label>
+    ${s.aviso === 'ntfy' ? ntfyCard() : ''}${s.aviso === 'push' && pushDisponivel() ? pushCard() : ''}
     ${s.aviso === 'nav' && notifHint() ? `<p class="small muted" style="margin-top:-4px">${notifHint()}</p>` : ''}
     <label class="field" for="s-step"><span>Passo dos botões − e + (kg)</span><select class="input" id="s-step">${[1, 2, 2.5, 5].map(v => `<option value="${v}"${+s.step === v ? ' selected' : ''}>${nf.format(v)} kg</option>`).join('')}</select></label>
   </div>
@@ -1337,6 +1335,84 @@ function ntfyCancel() {
   LS.set('ntfyPending', null);
   p.ids.forEach(id => fetch(`${NTFY}${p.topic}/${id}`, { method: 'DELETE' }).catch(() => {}));
 }
+/* Aviso do descanso por notificação (Web Push): o servidor dispara na hora certa, mesmo com o app fechado */
+const VAPID = (window.AXIS_CONFIG && window.AXIS_CONFIG.vapidPublicKey) || '';
+const FN_DESCANSO = window.AXIS_CONFIG && window.AXIS_CONFIG.supabaseUrl ? window.AXIS_CONFIG.supabaseUrl + '/functions/v1/descanso' : '';
+const isIOS = () => /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const pushSupported = () => !!VAPID && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const pushDisponivel = () => !!VAPID && isCloud() && !!state.user;
+const pushAtivo = () => notifState() === 'granted' && !!LS.get('push:ep', null);
+const pushOn = () => pushDisponivel() && state.settings.aviso === 'push' && pushAtivo();
+const restPush = { id: null };
+function pushHint() {
+  if (!pushSupported()) {
+    if (isIOS() && !isStandalone()) return 'No iPhone, a notificação só funciona com o app aberto pelo ícone da tela inicial.';
+    if (isIOS()) return 'Atualize o iPhone para o iOS 16.4 ou mais novo para receber notificações.';
+    return 'Este navegador não recebe notificações. Use o app pelo Chrome.';
+  }
+  if (notifState() === 'denied') return isIOS() ? 'As notificações estão bloqueadas. Libere em Ajustes do iPhone → Notificações → ÁXIS.' : 'As notificações estão bloqueadas. Libere nas configurações do celular (Notificações do app).';
+  return '';
+}
+function b64uBytes(str) { const p = str.replace(/-/g, '+').replace(/_/g, '/'); const b = atob(p + '='.repeat((4 - (p.length % 4)) % 4)); return Uint8Array.from(b, c => c.charCodeAt(0)); }
+async function pushAtivar(silencioso) {
+  if (!pushSupported()) throw new Error('nao-suporta');
+  let perm = Notification.permission;
+  if (perm === 'default' && !silencioso) { try { perm = await Notification.requestPermission(); } catch (e) { perm = 'denied'; } }
+  if (perm !== 'granted') throw new Error('sem-permissao');
+  const reg = await navigator.serviceWorker.ready;
+  const key = b64uBytes(VAPID);
+  let sub = await reg.pushManager.getSubscription();
+  if (sub && sub.options && sub.options.applicationServerKey) {
+    const atual = new Uint8Array(sub.options.applicationServerKey);
+    if (atual.length !== key.length || atual.some((b, i) => b !== key[i])) { try { await sub.unsubscribe(); } catch (e) { /* ok */ } sub = null; }
+  }
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+  const j = sub.toJSON();
+  await api.registrarPush(j.endpoint, j.keys.p256dh, j.keys.auth);
+  LS.set('push:ep', j.endpoint);
+  return true;
+}
+function pushRefresh() { if (state.settings.aviso === 'push' && pushSupported() && notifState() === 'granted' && state.user) pushAtivar(true).catch(() => {}); }
+function pushErro(e) {
+  const m = e && e.message;
+  if (m === 'sem-permissao') return pushHint() || 'Sem permissão para notificações. Toque em Ativar e escolha Permitir.';
+  if (m === 'nao-suporta') return pushHint();
+  return 'Não consegui ativar agora. Confira a internet e tente de novo.';
+}
+function avisoRow(seg) {
+  const t = state.draft ? treinoById(state.draft.treino) : null;
+  return { id: uuid(), endpoint: LS.get('push:ep', null), espera_s: Math.max(0, Math.min(1800, Math.round(seg))), titulo: 'Descanso acabou', corpo: 'Hora da próxima série' + (t ? ` · Treino ${t.id}` : ''), tag: 'descanso' };
+}
+function avisoAgendar() {
+  if (!pushOn() || !restActive()) return;
+  const seg = (timer.end - Date.now()) / 1000; if (seg < 1) return;
+  const row = avisoRow(seg); restPush.id = row.id;
+  api.agendarAviso(row).catch(() => { if (restPush.id === row.id) restPush.id = null; });
+}
+function avisoCancelar() { const id = restPush.id; if (!id) return; restPush.id = null; api.cancelarAviso(id).catch(() => {}); }
+function avisoAoSair() {
+  if (!pushOn() || !restActive() || restPush.id) return;
+  const seg = (timer.end - Date.now()) / 1000; if (seg < 0.5) return;
+  const row = avisoRow(seg); restPush.id = api.beaconAviso(row) ? row.id : null;
+}
+function pushCard() {
+  if (pushAtivo()) return `<div class="ntfy stack"><p class="small"><b>Ativado neste celular.</b> Quando o descanso acabar, chega uma notificação com som, mesmo com o app fechado ou o celular bloqueado.</p>
+    <button type="button" class="btn sm primary" data-action="push-teste" style="align-self:flex-start">Enviar teste</button>
+    <p class="small muted">No teste, bloqueie o celular logo depois de tocar: a notificação chega em uns 5 segundos.</p></div>`;
+  const h = pushHint();
+  return `<div class="ntfy stack">${h ? `<p class="small">${esc(h)}</p>` : `<p class="small">Toque em ativar e escolha <b>Permitir</b> quando o celular perguntar.</p><button type="button" class="btn sm primary" data-action="push-ativar" style="align-self:flex-start">Ativar notificações</button>`}</div>`;
+}
+function pushNudge() {
+  if (!pushDisponivel() || !canLog() || LS.get('push:nudge', null) || pushOn() || state.draft) return '';
+  const h = pushHint();
+  return `<div class="card stack note" style="margin-bottom:12px"><p><b>Aviso do descanso com o app fechado</b></p><p class="small">${h ? esc(h) : 'Receba uma notificação com som quando o descanso acabar, mesmo com o celular bloqueado.'}</p><div class="row gap"><button type="button" class="btn sm" data-action="push-nudge-nao">${h ? 'Ok' : 'Agora não'}</button>${h ? '' : '<button type="button" class="btn sm primary grow" data-action="push-ativar">Ativar</button>'}</div></div>`;
+}
+function avisoOptions(s) {
+  return `<option value="off"${s.aviso === 'off' || !s.aviso ? ' selected' : ''}>Desligado</option>
+      ${pushDisponivel() ? `<option value="push"${s.aviso === 'push' ? ' selected' : ''}>Notificação do ÁXIS (iPhone e Android)</option>` : ''}
+      <option value="ntfy"${s.aviso === 'ntfy' ? ' selected' : ''}>App ntfy (iPhone e Android)</option>
+      ${!pushDisponivel() || s.aviso === 'nav' ? `<option value="nav"${s.aviso === 'nav' ? ' selected' : ''}>Notificação do navegador (Android)</option>` : ''}`;
+}
 function swPost(msg) {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.ready.then(reg => { if (reg.active) reg.active.postMessage(msg); }).catch(() => {});
@@ -1349,6 +1425,8 @@ document.addEventListener('visibilitychange', () => {
     swPost({ type: 'rest-fg' });
     ntfyCancel();
     if (!$('#timer').hidden) tick();
+  } else if (pushOn() && restActive()) {
+    avisoAoSair();
   } else if (ntfyOn() && restActive()) {
     ntfySchedule();
   } else if (notifOn() && restActive()) {
@@ -1360,11 +1438,12 @@ function startTimer(sec) {
   timer.end = Date.now() + sec * 1000; timer.fired = false; timer.lastTick = null;
   const el = $('#timer'); el.hidden = false; el.classList.remove('over'); $('#timer-l').textContent = 'Descanso';
   clearInterval(timer.h); clearTimeout(timer.h); tick(); timer.h = setInterval(tick, 250);
-  syncRestNotice();
+  syncRestNotice(); avisoAgendar();
 }
 function tick() {
   const left = Math.ceil((timer.end - Date.now()) / 1000);
   $('#timer-t').textContent = mmss(Math.max(0, left));
+  if (restPush.id && left <= 4 && document.visibilityState === 'visible') avisoCancelar();
   if (left > 0 && left <= 3 && left !== timer.lastTick && !timer.fired) { timer.lastTick = left; playSound('tick'); }
   if (left <= 0 && !timer.fired) {
     timer.fired = true; $('#timer').classList.add('over'); $('#timer-l').textContent = 'Próxima série';
@@ -1372,7 +1451,7 @@ function tick() {
     clearInterval(timer.h); timer.h = setTimeout(stopTimer, 9000);
   }
 }
-function stopTimer() { const was = !$('#timer').hidden; clearInterval(timer.h); clearTimeout(timer.h); $('#timer').hidden = true; if (was) swPost({ type: 'rest-cancel' }); }
+function stopTimer() { const was = !$('#timer').hidden; clearInterval(timer.h); clearTimeout(timer.h); $('#timer').hidden = true; avisoCancelar(); if (was) swPost({ type: 'rest-cancel' }); }
 
 /* ---------- Armazenamento (neste celular) ---------- */
 function upsertLocal(sess) {
@@ -1768,8 +1847,20 @@ const api = window.AXIS_TEST_API || {
   apagarAvaliacao: async id => must(await sb.from('avaliacoes').delete().eq('id', id)),
   enviarFoto: async (path, blob) => must(await sb.storage.from('avaliacoes').upload(path, blob, { contentType: 'image/jpeg', upsert: false })),
   urlsFotos: async paths => must(await sb.storage.from('avaliacoes').createSignedUrls(paths, 3600)),
-  apagarFotos: async paths => must(await sb.storage.from('avaliacoes').remove(paths))
+  apagarFotos: async paths => must(await sb.storage.from('avaliacoes').remove(paths)),
+  registrarPush: async (endpoint, p256dh, auth) => must(await sb.rpc('registrar_push', { p_endpoint: endpoint, p_p256dh: p256dh, p_auth: auth })),
+  removerPush: async endpoint => must(await sb.from('push_inscricoes').delete().eq('endpoint', endpoint)),
+  agendarAviso: async row => must(await sb.from('avisos').insert(row)),
+  cancelarAviso: async id => must(await sb.from('avisos').delete().eq('id', id)),
+  // Ao sair da tela: sendBeacon (texto simples) chega mesmo com o app sendo pausado
+  beaconAviso: row => {
+    const tok = authToken(); if (!tok || !FN_DESCANSO || !navigator.sendBeacon) return false;
+    try { return navigator.sendBeacon(FN_DESCANSO, new Blob([JSON.stringify({ acao: 'agendar', token: tok, aviso: row })], { type: 'text/plain' })); } catch (e) { return false; }
+  }
 };
+function authToken() {
+  try { const ss = JSON.parse(localStorage.getItem('axis-auth') || 'null'); return ss && ss.access_token && (!ss.expires_at || ss.expires_at * 1000 > Date.now() + 5000) ? ss.access_token : null; } catch (e) { return null; }
+}
 
 /* Cache por aluno: o do próprio usuário fica salvo no celular para treinar sem internet */
 function cache(id) { return state.cache[id] || (state.cache[id] = { plan: null, sessions: [], corpo: [], avaliacoes: [], comentarios: [], loaded: false }); }
@@ -1993,6 +2084,7 @@ async function afterLogin(user) {
   if (state.me) pullSafe(state.me.id, true);
   if (state.role === 'personal') loadAlunos(true);
   flush();
+  pushRefresh();
 }
 async function askNewPassword() {
   const m = openSheet(`<form id="pw-form" class="stack"><h3>Nova senha</h3><p class="small muted">Digite a nova senha da sua conta.</p>
@@ -2128,10 +2220,8 @@ function ajustesAparelho() {
     <button type="button" class="btn sm" data-action="test-sound" style="align-self:flex-start">Testar som</button>
     <label class="toggle" for="s-tela"><input type="checkbox" id="s-tela"${s.telaLigada !== false ? ' checked' : ''}> Manter a tela ligada durante o treino</label>
     <label class="field" for="s-aviso"><span>Aviso quando o descanso acabar, fora do app</span><select class="input" id="s-aviso">
-      <option value="off"${s.aviso === 'off' ? ' selected' : ''}>Desligado</option>
-      <option value="ntfy"${s.aviso === 'ntfy' ? ' selected' : ''}>App ntfy (iPhone e Android)</option>
-      <option value="nav"${s.aviso === 'nav' ? ' selected' : ''}>Notificação do navegador (Android)</option></select></label>
-    ${s.aviso === 'ntfy' ? ntfyCard() : ''}
+      ${avisoOptions(s)}</select></label>
+    ${s.aviso === 'ntfy' ? ntfyCard() : ''}${s.aviso === 'push' && pushDisponivel() ? pushCard() : ''}
     ${s.aviso === 'nav' && notifHint() ? `<p class="small muted" style="margin-top:-4px">${notifHint()}</p>` : ''}
     <label class="field" for="s-step"><span>Passo dos botões − e + (kg)</span><select class="input" id="s-step">${[1, 2, 2.5, 5].map(v => `<option value="${v}"${+s.step === v ? ' selected' : ''}>${nf.format(v)} kg</option>`).join('')}</select></label>
   </div>`;
@@ -2354,6 +2444,8 @@ const cloudActions = {
   logout: async () => {
     const pend = outbox().length;
     if (!await ask('Sair da conta?', pend ? `Há ${pend} alterações que ainda não foram enviadas e serão perdidas.` : 'Você vai precisar do e-mail e da senha para entrar de novo.', 'Sair', true)) return;
+    avisoCancelar();
+    const ep = LS.get('push:ep', null); if (ep) { try { await api.removerPush(ep); } catch (e) { /* ok */ } }
     try { await api.signOut(); } catch (e) { /* ok */ }
     Object.keys(localStorage).filter(k => k.startsWith('mt:c:')).forEach(k => { try { localStorage.removeItem(k); } catch (e) { /* ok */ } });
     LS.set('draft', null); stopTimer();
@@ -2791,10 +2883,25 @@ const actions = {
     const data = JSON.stringify({ app: 'meus-treinos', versao: 1, exportadoEm: new Date().toISOString(), plan: state.plan, sessions: state.sessions, corpo: state.corpo }, null, 2);
     if (await offerFile(`axis-backup-${todayISO()}.json`, data, 'Backup pronto')) { LS.set('lastBackup', Date.now()); render(); }
   },
-  'timer-add': () => { timer.end = Math.max(timer.end, Date.now()) + 15000; timer.fired = false; $('#timer').classList.remove('over'); $('#timer-l').textContent = 'Descanso'; clearTimeout(timer.h); clearInterval(timer.h); tick(); timer.h = setInterval(tick, 250); syncRestNotice(); },
+  'timer-add': () => { timer.end = Math.max(timer.end, Date.now()) + 15000; timer.fired = false; $('#timer').classList.remove('over'); $('#timer-l').textContent = 'Descanso'; clearTimeout(timer.h); clearInterval(timer.h); tick(); timer.h = setInterval(tick, 250); syncRestNotice(); avisoAgendar(); },
   'timer-stop': () => stopTimer()
 };
 Object.assign(actions, cloudActions, {
+  'push-ativar': async () => {
+    try {
+      await pushAtivar(false);
+      state.settings.aviso = 'push'; LS.set('settings', state.settings); LS.set('push:nudge', 'ok');
+      toast('Pronto! O aviso do descanso chega mesmo com o app fechado.');
+    } catch (e) { toast(pushErro(e)); }
+    render();
+  },
+  'push-teste': async () => {
+    try {
+      await api.agendarAviso({ id: uuid(), endpoint: LS.get('push:ep', null), espera_s: 5, titulo: 'Teste do ÁXIS', corpo: 'É assim que chega o aviso do fim do descanso.', tag: 'teste' });
+      toast('Bloqueie o celular agora: o teste chega em uns 5 segundos.');
+    } catch (e) { toast(isNetErr(e) ? 'Sem internet: o teste precisa de conexão.' : 'Não consegui agendar o teste: ' + errText(e)); }
+  },
+  'push-nudge-nao': () => { LS.set('push:nudge', 'nao'); render(); },
   'copiar-ficha': async () => {
     const src = $('#cp-src') && $('#cp-src').value; if (!src) return;
     if (!await ask('Substituir a ficha?', `A ficha atual de ${alunoNome(state.ctx)} será trocada pela ficha de ${alunoNome(src)}. O histórico de treinos continua.`, 'Substituir', true)) return;
@@ -2884,6 +2991,8 @@ document.addEventListener('change', async e => {
       }
     }
     if (v === 'ntfy' && !state.settings.ntfyTopic) state.settings.ntfyTopic = newTopic();
+    if (v !== 'push') avisoCancelar();
+    if (v === 'push' && notifState() === 'granted') pushAtivar(true).then(() => render()).catch(() => render());
     if (v !== 'nav') swPost({ type: 'rest-cancel' });
     state.settings.aviso = v; state.settings.notif = v === 'nav';
     LS.set('settings', state.settings); render(); return;
@@ -2935,6 +3044,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 
 ntfyCancel();
 VDB.keys().then(ks => { if (ks && ks.length) { state.vids = new Set(ks); render(); } }).catch(() => {});
+if (window.AXIS_TEST_API) window.__axis = { state, timer, startTimer, stopTimer };
 if (CLOUD_ON) { bootCloud(); initStore(); }
 else {
   readHash();
