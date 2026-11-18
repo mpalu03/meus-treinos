@@ -353,6 +353,48 @@ h3.sec { font-family: var(--font-body); font-size: 11px; font-weight: 500; lette
 nav.tabs { background: color-mix(in srgb, var(--surface) 90%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 nav.tabs a { font-weight: 500; letter-spacing: .04em; border-radius: 999px; }
 .empty h2 { font-size: 26px; }
+/* ---------- Nuvem: login, ambientes, alunos, recados, avaliações ---------- */
+.envbar { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px; margin: -6px 0 16px; }
+.envbar button { border: 0; background: transparent; border-radius: 999px; padding: 8px 6px; font-weight: 500; color: var(--muted); cursor: pointer; letter-spacing: .05em; }
+.envbar button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.login { display: flex; flex-direction: column; gap: 14px; }
+.login .hero { text-align: center; padding: 14px 0 4px; }
+.login .hero .brand-name { font-size: 56px; }
+.login .hero .brand-sub { font-size: 10px; }
+.login .hero p { color: var(--muted); margin-top: 12px; }
+.login .seg { margin-bottom: 0; }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--accent); }
+.note { background: var(--gold-soft); border-color: var(--gold); color: var(--ink); }
+.av { width: 42px; height: 42px; border-radius: 50%; background: var(--t-soft); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; font-size: 21px; flex: none; border: 1px solid var(--t); }
+.av.big { width: 56px; height: 56px; font-size: 28px; }
+.acard { display: flex; align-items: center; gap: 12px; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; text-align: left; color: var(--ink); cursor: pointer; box-shadow: 0 1px 2px rgba(70, 60, 40, .05); }
+.acard b { display: block; font-weight: 500; font-size: 16px; }
+.acard small { color: var(--muted); font-size: 13px; }
+.count { min-width: 22px; height: 22px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; padding: 0 6px; flex: none; }
+.pill.wait { background: var(--surface-2); color: var(--muted); }
+.back { background: none; border: 0; color: var(--accent); font-weight: 500; padding: 4px 0; cursor: pointer; font-size: 15px; }
+.ahead { display: flex; align-items: center; gap: 12px; margin: 6px 0 12px; }
+.ahead h2 { font-family: var(--font-display); font-weight: 600; font-size: 28px; margin: 0; letter-spacing: .03em; line-height: 1.05; text-wrap: balance; }
+.ahead p { color: var(--muted); font-size: 13.5px; }
+.subtabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; scrollbar-width: none; }
+.subtabs::-webkit-scrollbar { display: none; }
+.subtabs button { flex: none; border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 8px 14px; font-weight: 500; cursor: pointer; }
+.subtabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.thread { display: flex; flex-direction: column; gap: 8px; }
+.msg { background: var(--surface-2); border-radius: 14px 14px 14px 4px; padding: 8px 11px; max-width: 88%; align-self: flex-start; }
+.msg.mine { background: var(--gold-soft); border-radius: 14px 14px 4px 14px; align-self: flex-end; }
+.msg .who { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+.msg .txt { white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg .xbtn { width: 22px; height: 22px; font-size: 11px; }
+.msgform .input { min-width: 0; flex: 1 1 auto; }
+.avgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.photos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.photo { position: relative; border-radius: 12px; overflow: hidden; background: var(--surface-2); aspect-ratio: 3 / 4; display: flex; align-items: center; justify-content: center; border: 1px dashed var(--line); text-align: center; padding: 6px; }
+.photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.photo a { position: absolute; inset: 0; }
+.photo span { position: absolute; left: 8px; bottom: 8px; background: rgba(0, 0, 0, .55); color: #fff; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; }
+.photo label { position: absolute; inset: 0; cursor: pointer; }
+nav.tabs .badge.n { width: auto; min-width: 17px; height: 17px; padding: 0 4px; font-size: 10px; color: #fff; display: inline-flex; align-items: center; justify-content: center; right: calc(50% - 24px); top: 2px; }
 </style>
 </head>
 <body>
@@ -361,6 +403,7 @@ nav.tabs a { font-weight: 500; letter-spacing: .04em; border-radius: 999px; }
     <h1 class="brand"><span class="brand-name">ÁXIS</span><span class="brand-rule" aria-hidden="true"></span><span class="brand-sub">Meus treinos</span></h1>
     <div class="sync" id="sync" role="status"><span class="dot"></span><span id="sync-t">Salvo neste celular</span></div>
   </header>
+  <div id="envbar"></div>
   <main id="view"></main>
 </div>
 
@@ -373,14 +416,11 @@ nav.tabs a { font-weight: 500; letter-spacing: .04em; border-radius: 999px; }
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <nav class="tabs" aria-label="Seções">
-  <div class="inner">
-    <a href="#treino" data-v="treino"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6v12M3.5 9v6M17.5 6v12M20.5 9v6M6.5 12h11"/></svg>Treino<span class="badge" id="draft-badge" hidden></span></a>
-    <a href="#historico" data-v="historico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Histórico</a>
-    <a href="#evolucao" data-v="evolucao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 20h17"/><path d="M5 16l4.5-5 4 3 6-7.5"/></svg>Evolução</a>
-    <a href="#ficha" data-v="ficha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16.5" rx="2"/><path d="M9 3h6v3.5H9zM8.5 11h7M8.5 15h7"/></svg>Ficha</a>
-  </div>
+  <div class="inner" id="nav-inner"></div>
 </nav>
 
+<script src="config.js"></script>
+<script src="vendor/supabase-2.118.0.js"></script>
 <script src="vendor/jspdf.umd.min.js"></script>
 <script>
 (() => {
@@ -514,6 +554,8 @@ const state = {
   calDay: null,
   evoMode: 'cargas',
   vids: new Set(),
+  mode: 'local', env: 'aluno', role: null, user: null, profile: null, me: null, alunos: [], alunoSel: null, alunoTab: 'resumo',
+  cache: {}, resumo: { sessoes: [], comentarios: [], metas: {} }, ctx: null, syncErr: '', loginMode: null, busca: '',
   view: 'treino',
   sel: null,
   evo: { treino: null, ex: null },
@@ -674,6 +716,7 @@ function chips(active, action, plan = state.plan) {
 }
 
 function viewTreino() {
+  if (isCloud()) { const g = cloudTreinoGate(); if (g) return g; }
   if (state.draft) {
     if (treinoById(state.draft.treino)) return viewDraft();
     state.draft = null; LS.set('draft', null);
@@ -682,7 +725,7 @@ function viewTreino() {
   const t = treinoById(state.sel) || treinoById(sug) || state.plan.treinos[0];
   const ls = lastSessionOf(t.id);
   return `
-  ${weekCard()}
+  ${isCloud() ? migrationCard() : ''}${weekCard()}
   ${chips(t.id, 'pick')}
   <div class="card thead" style="${tv(t.id)}">
     <div class="big" aria-hidden="true">${esc(t.id)}</div>
@@ -803,7 +846,10 @@ function shiftMonth(k) {
 }
 function viewHistorico() {
   const ss = sortedSessions().reverse();
-  if (!ss.length) return emptyBlock('Nenhum treino salvo ainda', 'Quando você salvar um treino na aba Treino, ele aparece aqui no calendário com a carga de cada exercício.', 'Ir para Treino', 'go-treino');
+  const souAluno = isCloud() && canLog() && state.role !== 'personal';
+  const recadosGeral = souAluno ? `<h3 class="sec">Recados com o seu personal</h3><div class="card">${thread(state.ctx, '')}</div>` : '';
+  if (isCloud() && canLog()) markSeen(state.ctx, cache(state.ctx).comentarios);
+  if (!ss.length) return emptyBlock('Nenhum treino salvo ainda', canLog() ? 'Quando você salvar um treino na aba Treino, ele aparece aqui no calendário com a carga de cada exercício.' : 'Quando o aluno registrar treinos no app, eles aparecem aqui.', canLog() ? 'Ir para Treino' : null, 'go-treino') + recadosGeral;
   const w = weekInfo();
   const durs = ss.slice(0, 20).map(s => s.duracaoMin).filter(v => v > 0);
   const avgDur = durs.length ? Math.round(durs.reduce((a, b) => a + b, 0) / durs.length) : null;
@@ -813,7 +859,8 @@ function viewHistorico() {
     <div class="stat"><small>Sequência</small><b>${w.streak} ${w.streak === 1 ? 'semana' : 'semanas'}</b></div>
     <div class="stat"><small>Total</small><b>${ss.length} ${ss.length === 1 ? 'treino' : 'treinos'}</b></div>
     <div class="stat"><small>Duração média</small><b>${avgDur ? fmtDur(avgDur) : '—'}</b></div></div></div>`;
-  if (LOCAL_ONLY) {
+  html += recadosGeral;
+  if (!isCloud()) {
     const dsb = daysSinceBackup();
     if (ss.length >= 4 && (dsb == null || dsb >= 14)) html += `<div class="card row gap" style="margin-top:10px"><p class="small grow">${dsb == null ? 'Você ainda não fez backup.' : `Último backup há ${dsb} dias.`} Seus treinos ficam só neste celular.</p><button type="button" class="btn sm" data-action="backup">Baixar backup</button></div>`;
   }
@@ -827,11 +874,12 @@ function viewHistorico() {
     const t = treinoById(s.treino);
     const ids = Object.keys(s.itens || {});
     const nPR = ids.filter(id => prs.has(s.id + '|' + id)).length;
+    const nc = isCloud() ? (cache(state.ctx).comentarios || []).filter(m => m.sessao_id === s.id).length : 0;
     const open = state.openSess === s.id || (!!state.calDay && list.length === 1);
     html += `<article class="hcard" style="${tv(s.treino)};margin-bottom:8px">
       <button type="button" class="hrow" data-action="toggle-sess" data-id="${esc(s.id)}" aria-expanded="${open}">
         <span class="hl">${esc(s.treino)}</span>
-        <span class="grow"><b>${esc(fmtDia(s.data))}${nPR ? `<span class="pill">${nPR} ${nPR === 1 ? 'recorde' : 'recordes'}</span>` : ''}</b><small>${esc(t ? t.nome : 'Treino ' + s.treino)} · ${ids.length} ${ids.length === 1 ? 'exercício' : 'exercícios'}${s.duracaoMin ? ' · ' + fmtDur(s.duracaoMin) : ''}</small></span>
+        <span class="grow"><b>${esc(fmtDia(s.data))}${nPR ? `<span class="pill">${nPR} ${nPR === 1 ? 'recorde' : 'recordes'}</span>` : ''}</b><small>${esc(t ? t.nome : 'Treino ' + s.treino)} · ${ids.length} ${ids.length === 1 ? 'exercício' : 'exercícios'}${s.duracaoMin ? ' · ' + fmtDur(s.duracaoMin) : ''}${nc ? ` · ${nc} ${nc === 1 ? 'comentário' : 'comentários'}` : ''}</small></span>
         <span class="chev" aria-hidden="true">›</span>
       </button>
       ${open ? `<div class="hbody">
@@ -841,7 +889,8 @@ function viewHistorico() {
           return `<tr><td>${esc(nome)}${prs.has(s.id + '|' + id) ? '<span class="pill">Recorde</span>' : ''}${it.obs ? `<div class="obs">${esc(it.obs)}</div>` : ''}</td><td class="n">${esc(fmtCarga(it.carga, fx ? fx.e.unidade : 'kg'))}${Array.isArray(it.cargas) ? `<div class="obs">${esc(fmtSets(it.cargas))}</div>` : ''}</td><td class="n">${it.feitas || 0}/${it.total || Math.max(it.feitas || 0, fx ? nSeries(fx.e) : 0)}</td></tr>`;
         }).join('')}</tbody></table></div>` : '<p class="muted small">Sem cargas registradas.</p>'}
         ${s.nota ? `<p class="small"><b>Anotação:</b> ${esc(s.nota)}</p>` : ''}
-        <div class="row gap"><button type="button" class="btn sm" data-action="edit-sess" data-id="${esc(s.id)}">Editar</button><button type="button" class="btn sm danger" data-action="del-sess" data-id="${esc(s.id)}">Excluir</button></div>
+        ${canLog() ? `<div class="row gap"><button type="button" class="btn sm" data-action="edit-sess" data-id="${esc(s.id)}">Editar</button><button type="button" class="btn sm danger" data-action="del-sess" data-id="${esc(s.id)}">Excluir</button></div>` : ''}
+        ${isCloud() ? `<div class="vsec"><b class="small">Comentários</b>${thread(state.ctx, s.id)}</div>` : ''}
       </div>` : ''}
     </article>`;
   }
@@ -856,8 +905,11 @@ function evoTreinoDefault() {
 }
 
 function viewEvolucao() {
-  const seg = `<div class="seg" role="group" aria-label="O que acompanhar"><button type="button" data-action="evo-mode" data-m="cargas" aria-pressed="${state.evoMode !== 'corpo'}">Cargas</button><button type="button" data-action="evo-mode" data-m="corpo" aria-pressed="${state.evoMode === 'corpo'}">Peso corporal</button></div>`;
-  return seg + (state.evoMode === 'corpo' ? viewCorpo() : viewCargas());
+  const withAv = isCloud() && state.view !== 'aluno';
+  if (!withAv && state.evoMode === 'avaliacoes') state.evoMode = 'cargas';
+  const opts = [['cargas', 'Cargas'], ['corpo', 'Peso corporal']].concat(withAv ? [['avaliacoes', 'Avaliações']] : []);
+  const seg = `<div class="seg" role="group" aria-label="O que acompanhar" style="grid-template-columns:repeat(${opts.length},1fr)">${opts.map(([k, l]) => `<button type="button" data-action="evo-mode" data-m="${k}" aria-pressed="${(state.evoMode || 'cargas') === k}">${l}</button>`).join('')}</div>`;
+  return seg + (state.evoMode === 'corpo' ? viewCorpo() : state.evoMode === 'avaliacoes' ? viewAvaliacoes(false) : viewCargas());
 }
 function corpoBoxes(cp) {
   const first = cp[0].v, last = cp[cp.length - 1].v, diff = Math.round((last - first) * 10) / 10;
@@ -866,21 +918,21 @@ function corpoBoxes(cp) {
 function viewCorpo() {
   const pts = corpoPts(), last = pts[pts.length - 1];
   let html = `<div class="card stack" style="--t:var(--accent);--t-soft:var(--surface-2)">
-    <div class="row gap wrap" style="align-items:flex-end">
+    ${canLog() ? `<div class="row gap wrap" style="align-items:flex-end">
       <label class="field" for="bw-date" style="flex:1 1 140px"><span>Data</span><input class="input" type="date" id="bw-date" value="${todayISO()}" max="${todayISO()}"></label>
       <label class="field" for="bw-kg" style="flex:1 1 100px"><span>Peso (kg)</span><input class="input" id="bw-kg" inputmode="decimal" autocomplete="off" placeholder="${last ? esc(nfIn.format(last.v)) : 'Ex.: 82,5'}"></label>
       <button type="button" class="btn primary" data-action="bw-add" style="flex:1 1 100px">Registrar</button>
-    </div>`;
+    </div>` : ''}`;
   if (pts.length) {
     html += `<div class="stats">${corpoBoxes(pts).map(([k, v]) => `<div class="stat"><small>${k}</small><b>${esc(v)}</b></div>`).join('')}</div><div class="chart" id="chart"></div>`;
-  } else html += `<p class="muted">Registre seu peso de vez em quando, de preferência no mesmo horário (por exemplo, segunda de manhã), e a linha de evolução aparece aqui.</p>`;
+  } else html += `<p class="muted">${canLog() ? 'Registre seu peso de vez em quando, de preferência no mesmo horário (por exemplo, segunda de manhã), e a linha de evolução aparece aqui.' : 'O aluno ainda não registrou o peso no app.'}</p>`;
   html += `</div>`;
   if (pts.length) {
     const rows = corpoSorted().reverse();
     html += `<div class="row gap wrap" style="margin-top:12px"><button type="button" class="btn primary grow" data-action="pdf-corpo">Exportar PDF do peso corporal</button></div>
     <h3 class="sec">Registros</h3><div class="card tscroll"><table class="t"><thead><tr><th>Data</th><th class="n">Peso</th><th class="n">Diferença</th><th></th></tr></thead><tbody>${rows.map((x, i) => {
       const prev = rows[i + 1], dd = prev ? Math.round((x.kg - prev.kg) * 10) / 10 : null;
-      return `<tr><td>${esc(fmtDMY(x.data))}</td><td class="n">${esc(fmtCarga(x.kg))}</td><td class="n muted">${dd == null ? '—' : (dd > 0 ? '+' : '') + esc(nf.format(dd)) + ' kg'}</td><td class="n"><button type="button" class="xbtn" data-action="bw-del" data-id="${esc(x.id)}" aria-label="Excluir o peso de ${esc(fmtDMY(x.data))}">✕</button></td></tr>`;
+      return `<tr><td>${esc(fmtDMY(x.data))}</td><td class="n">${esc(fmtCarga(x.kg))}</td><td class="n muted">${dd == null ? '—' : (dd > 0 ? '+' : '') + esc(nf.format(dd)) + ' kg'}</td><td class="n">${canLog() ? `<button type="button" class="xbtn" data-action="bw-del" data-id="${esc(x.id)}" aria-label="Excluir o peso de ${esc(fmtDMY(x.data))}">✕</button>` : ''}</td></tr>`;
     }).join('')}</tbody></table></div>`;
   }
   return html;
@@ -943,7 +995,7 @@ function viewFicha() {
   if (!editing) {
     html += `<div class="card thead" style="${tv(t.id)}"><div class="big" aria-hidden="true">${esc(t.id)}</div><div class="grow"><h2>${esc(t.nome)}</h2><p>${t.exercicios.length} exercícios</p></div></div>
     <ul class="exlist" style="${tv(t.id)};margin-top:10px">${t.exercicios.map(e => `<li class="exrow" style="grid-template-columns:auto 1fr"><span class="ord">${esc(e.ordem)}</span><div><div class="exname">${esc(e.nome)}</div><div class="presc">${esc(presc(e))} · ${unitLabel(e.unidade)}${e.series != null && e.series !== plan.seriesPadrao ? ' · séries próprias' : ''}</div>${e.obs ? `<div class="obs">${esc(e.obs)}</div>` : ''}</div></li>`).join('')}</ul>
-    <button type="button" class="btn block" data-action="ed-start" style="margin-top:12px">Editar ficha</button>`;
+    ${canEditPlan() ? '<button type="button" class="btn block" data-action="ed-start" style="margin-top:12px">Editar ficha</button>' : `<p class="small muted" style="margin-top:12px">Ficha montada pelo seu personal${cache(state.ctx).planAt ? ' · atualizada em ' + esc(fmtDMY(String(cache(state.ctx).planAt).slice(0, 10))) : ''}.</p>`}`;
   } else {
     html += `<div class="stack" style="${tv(t.id)}">
       <label class="field" for="ed-grupo"><span>Nome do Treino ${esc(t.id)}</span><input class="input" id="ed-grupo" data-ed="grupo" value="${esc(t.nome)}" autocomplete="off"></label>
@@ -974,6 +1026,19 @@ function viewFicha() {
   }
   const s = state.settings;
   const sp = (state.editPlan || state.plan).seriesPadrao;
+  const planCfg = `<label class="field" for="s-series"><span>Séries por exercício</span><select class="input" id="s-series">${Array.from({ length: 8 }, (_, i) => i + 1).map(v => `<option value="${v}"${sp === v ? ' selected' : ''}>${v} ${v === 1 ? 'série' : 'séries'}</option>`).join('')}</select><span class="small" style="font-weight:500">Vale para todos os exercícios, menos os que têm número próprio de séries na ficha.</span></label>
+    <label class="field" for="s-meta"><span>Meta de treinos por semana</span><select class="input" id="s-meta">${[1, 2, 3, 4, 5, 6, 7].map(v => `<option value="${v}"${(state.editPlan || state.plan).metaSemanal === v ? ' selected' : ''}>${v} ${v === 1 ? 'treino' : 'treinos'}</option>`).join('')}</select></label>`;
+  if (isCloud() && state.view === 'aluno') {
+    const outros = state.alunos.filter(a => a.id !== state.ctx);
+    return html + `<h3 class="sec">Ajustes da ficha</h3><div class="card stack">${planCfg}</div>
+      ${outros.length || state.me ? `<h3 class="sec">Copiar ficha</h3><div class="card stack"><label class="field" for="cp-src"><span>Substituir pela ficha de</span><select class="input" id="cp-src">${outros.map(a => `<option value="${esc(a.id)}">${esc(a.nome)}</option>`).join('')}${state.me ? `<option value="${esc(state.me.id)}">Minha ficha</option>` : ''}</select></label><button type="button" class="btn" data-action="copiar-ficha">Copiar ficha</button></div>` : ''}`;
+  }
+  if (isCloud()) {
+    html += canEditPlan() ? `<h3 class="sec">Ajustes da ficha</h3><div class="card stack">${planCfg}</div>` : '';
+    html += `<h3 class="sec">Ajustes deste celular</h3>${ajustesAparelho()}<h3 class="sec">Conta</h3>${contaCard()}`;
+    html += `<h3 class="sec">Exportar</h3><div class="card stack"><p class="small muted">Seus treinos ficam salvos na sua conta. Você também pode baixar uma cópia.</p><div class="row gap wrap"><button type="button" class="btn grow" data-action="backup">Baixar backup (.json)</button><button type="button" class="btn grow" data-action="csv">Exportar planilha (.csv)</button></div>${canEditPlan() ? '<button type="button" class="btn danger" data-action="reset-plan">Restaurar ficha original</button>' : ''}</div>`;
+    return html;
+  }
   html += `<h3 class="sec">Ajustes</h3><div class="card stack">
     <label class="field" for="s-series"><span>Séries por exercício</span><select class="input" id="s-series">${Array.from({ length: 8 }, (_, i) => i + 1).map(v => `<option value="${v}"${sp === v ? ' selected' : ''}>${v} ${v === 1 ? 'série' : 'séries'}</option>`).join('')}</select><span class="small" style="font-weight:500">Vale para todos os exercícios, menos os que têm número próprio de séries na ficha.</span></label>
     <label class="field" for="s-meta"><span>Meta de treinos por semana</span><select class="input" id="s-meta">${[1, 2, 3, 4, 5, 6, 7].map(v => `<option value="${v}"${(state.editPlan || state.plan).metaSemanal === v ? ' selected' : ''}>${v} ${v === 1 ? 'treino' : 'treinos'}</option>`).join('')}</select></label>
@@ -1005,13 +1070,63 @@ function viewFicha() {
   return html;
 }
 
-const VIEWS = { treino: viewTreino, historico: viewHistorico, evolucao: viewEvolucao, ficha: viewFicha };
+const VIEWS = { treino: viewTreino, historico: viewHistorico, evolucao: viewEvolucao, ficha: viewFicha, alunos: viewAlunos, aluno: viewAluno, recados: viewRecados, conta: viewConta, login: viewLogin, convite: viewConvite, carregando: viewCarregando };
+const ICONS = {
+  treino: '<path d="M6.5 6v12M3.5 9v6M17.5 6v12M20.5 9v6M6.5 12h11"/>',
+  historico: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  evolucao: '<path d="M3.5 20h17"/><path d="M5 16l4.5-5 4 3 6-7.5"/>',
+  ficha: '<rect x="5" y="4.5" width="14" height="16.5" rx="2"/><path d="M9 3h6v3.5H9zM8.5 11h7M8.5 15h7"/>',
+  perfil: '<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20.5c1.3-3.6 4.2-5.4 7.5-5.4s6.2 1.8 7.5 5.4"/>',
+  alunos: '<circle cx="9" cy="8.5" r="3.4"/><path d="M2.8 19.5c1-3.1 3.4-4.7 6.2-4.7s5.2 1.6 6.2 4.7"/><path d="M15.5 5.6a3.2 3.2 0 0 1 0 6.2M17.6 14.9c1.9.6 3.2 2.1 3.8 4.4"/>',
+  recados: '<path d="M4 5.5h16v10.5H9.5L5 19.5V16H4z"/><path d="M8 9.5h8M8 12.5h5"/>',
+  conta: '<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20.5c1.3-3.6 4.2-5.4 7.5-5.4s6.2 1.8 7.5 5.4"/>'
+};
+function navTabs() {
+  if (isCloud() && (!state.user || ['login', 'convite', 'carregando'].includes(state.view))) return [];
+  if (isCloud() && state.env === 'personal') return [['alunos', 'Alunos'], ['recados', 'Recados'], ['conta', 'Conta']];
+  return [['treino', 'Treino'], ['historico', 'Histórico'], ['evolucao', 'Evolução'], ['ficha', isCloud() ? 'Perfil' : 'Ficha']];
+}
+let navSig = '';
+function renderNav() {
+  const tabs = navTabs(), nav = document.querySelector('nav.tabs');
+  nav.hidden = !tabs.length;
+  const cur = state.view === 'aluno' ? 'alunos' : state.view;
+  const badges = {};
+  if (state.draft) badges.treino = '•';
+  if (isCloud() && state.user) {
+    if (state.env === 'personal') { const n = state.alunos.reduce((m, a) => m + unreadOf(a.id, (state.resumo || {}).comentarios), 0); if (n) badges.recados = n; }
+    else if (state.me && state.ctx === state.me.id) { const n = unreadOf(state.me.id, cache(state.me.id).comentarios); if (n) badges.historico = n; }
+  }
+  const sig = JSON.stringify([tabs, cur, badges]);
+  if (sig === navSig) return; navSig = sig;
+  const inner = $('#nav-inner');
+  inner.style.gridTemplateColumns = `repeat(${tabs.length || 1}, 1fr)`;
+  inner.innerHTML = tabs.map(([v, l]) => `<a href="#${v}" data-v="${v}"${v === cur ? ' aria-current="page"' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[v === 'ficha' && isCloud() ? 'perfil' : v]}</svg>${l}${badges[v] ? (badges[v] === '•' ? '<span class="badge" aria-label="Treino em andamento"></span>' : `<span class="badge n" aria-label="${badges[v]} novos">${badges[v]}</span>`) : ''}</a>`).join('');
+}
+function meuTreinoSetup() {
+  return `<div class="card empty"><h2>Seu treino</h2><p>Para registrar os seus próprios treinos, crie a sua ficha pessoal.${legacyData().sessions.length ? ' Os treinos salvos neste celular podem ir junto.' : ''}</p><button type="button" class="btn primary" data-action="criar-meu">Criar minha ficha</button></div>`;
+}
+function cloudTreinoGate() {
+  if (!state.me) return meuTreinoSetup();
+  const c = cache(state.me.id);
+  if (!c.plan) {
+    if (!c.loaded) return `<div class="card empty"><p>Carregando a sua ficha…</p></div>`;
+    return emptyBlock(state.role === 'personal' ? 'Sem ficha' : 'Sua ficha ainda não está pronta', state.role === 'personal' ? 'Monte a sua ficha na aba Perfil.' : 'O seu personal ainda não montou a sua ficha. Assim que ele salvar, ela aparece aqui.', null, null);
+  }
+  return '';
+}
+function migrationCard() {
+  if (!canLog() || !state.me || LS.get('legado:migrado', null) || LS.get('legado:adiado:' + state.me.id, null)) return '';
+  const leg = legacyData(); if (!leg.sessions.length && !leg.corpo.length) return '';
+  return `<div class="card stack note" style="margin-bottom:12px"><p><b>Encontrei ${leg.sessions.length} treinos${leg.corpo.length ? ` e ${leg.corpo.length} registros de peso` : ''} salvos só neste celular.</b></p><p class="small">Envie para a sua conta para não perder nada${state.role === 'personal' ? '' : ' e o seu personal acompanhar'}.</p><div class="row gap"><button type="button" class="btn sm" data-action="migrar-nao">Agora não</button><button type="button" class="btn sm primary grow" data-action="migrar">Enviar para a conta</button></div></div>`;
+}
 
 function renderView() {
   const ae = document.activeElement;
   let fid = null, s0 = null, s1 = null;
   if (ae && ae.id && viewEl.contains(ae)) { fid = ae.id; try { s0 = ae.selectionStart; s1 = ae.selectionEnd; } catch (e) { /* tipo sem seleção */ } }
-  viewEl.innerHTML = VIEWS[state.view]();
+  const fn = (isCloud() && state.env === 'aluno' && !state.me && state.role === 'personal' && ['historico', 'evolucao', 'ficha'].includes(state.view)) ? meuTreinoSetup : (VIEWS[state.view] || viewTreino);
+  viewEl.innerHTML = fn();
   if (fid) {
     const el = document.getElementById(fid);
     if (el) { el.focus({ preventScroll: true }); try { if (s0 != null) el.setSelectionRange(s0, s1); } catch (e) { /* ok */ } }
@@ -1020,10 +1135,17 @@ function renderView() {
 }
 function renderChrome() {
   const sync = $('#sync');
-  sync.className = 'sync ' + (state.saveFail ? 'warn' : 'cloud');
-  $('#sync-t').textContent = state.saveFail ? 'Não está salvando' : 'Salvo neste celular';
-  document.querySelectorAll('nav.tabs a').forEach(a => { if (a.dataset.v === state.view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-  $('#draft-badge').hidden = !state.draft;
+  if (isCloud()) {
+    const pend = outbox().length, off = navigator.onLine === false || state.syncErr === 'offline';
+    sync.hidden = !state.user;
+    sync.className = 'sync ' + (state.syncErr === 'erro' ? 'warn' : (off || pend) ? 'local' : 'cloud');
+    $('#sync-t').textContent = off ? (pend ? `Sem internet · ${pend} para enviar` : 'Sem internet') : pend ? 'Enviando…' : state.syncErr === 'erro' ? 'Erro ao sincronizar' : 'Sincronizado';
+  } else {
+    sync.className = 'sync ' + (state.saveFail ? 'warn' : 'cloud');
+    $('#sync-t').textContent = state.saveFail ? 'Não está salvando' : 'Salvo neste celular';
+  }
+  const eb = $('#envbar'), ebh = envBar(); if (eb.innerHTML !== ebh) eb.innerHTML = ebh;
+  renderNav();
 }
 function render() { renderChrome(); renderView(); syncWakeLock(); }
 
@@ -1256,19 +1378,39 @@ function stopTimer() { const was = !$('#timer').hidden; clearInterval(timer.h); 
 function upsertLocal(sess) {
   const i = state.sessions.findIndex(s => s.id === sess.id);
   if (i >= 0) state.sessions[i] = sess; else state.sessions.push(sess);
+  if (isCloud()) { cache(state.ctx).sessions = state.sessions; saveCtxCache(); return true; }
   return LS.set('sessions', state.sessions);
 }
 function savedOrWarn(ok) { state.saveFail = !ok; if (!ok) toast(SAVE_FAIL); renderChrome(); return ok; }
-async function persistSession(sess) { const ok = upsertLocal(sess); render(); return savedOrWarn(ok); }
+async function persistSession(sess) {
+  const ok = upsertLocal(sess); render();
+  if (isCloud()) { enqueue({ k: 'sessoes:' + sess.id, t: 'sessoes', op: 'upsert', id: sess.id, aluno: state.ctx, row: sessRow(sess, state.ctx), local: sess }); return true; }
+  return savedOrWarn(ok);
+}
 async function removeSession(id) {
   state.sessions = state.sessions.filter(s => s.id !== id);
+  if (isCloud()) { cache(state.ctx).sessions = state.sessions; saveCtxCache(); enqueue({ k: 'sessoes:' + id, t: 'sessoes', op: 'delete', id, aluno: state.ctx }); render(); return true; }
   const ok = LS.set('sessions', state.sessions); render(); return savedOrWarn(ok);
 }
 async function persistPlan() {
   state.plan.atualizadoEm = Date.now();
+  if (isCloud()) {
+    const c = cache(state.ctx); c.plan = state.plan; c.planAt = new Date().toISOString(); saveCtxCache();
+    enqueue({ k: 'fichas:' + state.ctx, t: 'fichas', op: 'upsert', id: state.ctx, aluno: state.ctx, row: { aluno_id: state.ctx, plano: state.plan } });
+    render(); return true;
+  }
   const ok = LS.set('plan', state.plan); render(); return savedOrWarn(ok);
 }
-async function persistCorpo() { const ok = LS.set('corpo', state.corpo); render(); return savedOrWarn(ok); }
+async function persistCorpo() {
+  if (isCloud()) {
+    const c = cache(state.ctx); c.corpo = state.corpo;
+    const prev = c.corpoPrev || {}, now = corpoMap(state.corpo);
+    for (const x of state.corpo) if (prev[x.id] !== now[x.id]) enqueue({ k: 'corpo:' + x.id, t: 'corpo', op: 'upsert', id: x.id, aluno: state.ctx, row: { id: x.id, aluno_id: state.ctx, data: x.data, kg: x.kg }, local: x });
+    for (const id of Object.keys(prev)) if (!(id in now)) enqueue({ k: 'corpo:' + id, t: 'corpo', op: 'delete', id, aluno: state.ctx });
+    c.corpoPrev = now; saveCtxCache(); render(); return true;
+  }
+  const ok = LS.set('corpo', state.corpo); render(); return savedOrWarn(ok);
+}
 let draftT;
 function saveDraftSoon() { clearTimeout(draftT); draftT = setTimeout(() => LS.set('draft', state.draft), 300); }
 async function initStore() {
@@ -1285,7 +1427,7 @@ function pdfHeader(doc, title, subtitle) {
   doc.setTextColor(...PDF_SAGE); doc.setFont('times', 'normal'); doc.setFontSize(15); doc.text('ÁXIS', 194, 15, { align: 'right', charSpace: 1.4 });
   doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...PDF_GOLD); doc.text('MEUS TREINOS', 194, 20.5, { align: 'right', charSpace: 1.1 });
   doc.setTextColor(46, 54, 49); doc.setFont('times', 'bold'); doc.setFontSize(21); doc.text(title, 16, 16);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(116, 123, 117); doc.text(subtitle, 16, 24);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(116, 123, 117); doc.text((isCloud() && state.env === 'personal' && state.ctx ? alunoNome(state.ctx) + ' · ' : '') + subtitle, 16, 24);
   return 44;
 }
 function pdfFooter(doc) {
@@ -1523,11 +1665,11 @@ async function openVideo(exId) {
     ${player}
     <div class="vsec">
       <a class="btn" href="${ytSearch(e)}" target="_blank" rel="noopener">Buscar vídeos no YouTube</a>
-      <label class="field" for="v-link"><span>Link do vídeo</span><input class="input" id="v-link" inputmode="url" autocomplete="off" placeholder="Cole aqui o link do YouTube" value="${esc(e.video || '')}"></label>
+      ${canEditPlan() ? `<label class="field" for="v-link"><span>Link do vídeo</span><input class="input" id="v-link" inputmode="url" autocomplete="off" placeholder="Cole aqui o link do YouTube" value="${esc(e.video || '')}"></label>
       <div class="row gap wrap">
         <button type="button" class="btn primary grow" data-action="v-save-link">Salvar link</button>
         ${e.video ? '<button type="button" class="btn danger" data-action="v-del-link">Remover link</button>' : ''}
-      </div>
+      </div>` : ''}
     </div>
     <div class="vsec">
       <p class="small muted">Ou guarde um vídeo seu, por exemplo o professor mostrando a execução. Fica só neste celular.</p>
@@ -1558,6 +1700,882 @@ async function saveVideoFile(file) {
   } catch (e) { toast('Não consegui salvar o vídeo. Pode faltar espaço no celular.'); }
 }
 
+/* ---------- Nuvem: login, sincronização e os dois ambientes ---------- */
+const CFG = window.AXIS_CONFIG || {};
+const CLOUD_ON = !!(window.AXIS_TEST_API || (CFG.supabaseUrl && CFG.supabaseKey && window.supabase));
+const APP_URL = location.origin + location.pathname;
+let sb = null;
+const isCloud = () => state.mode === 'cloud';
+const uid = () => (state.user ? state.user.id : null);
+const canLog = () => !isCloud() || (!!state.me && state.ctx === state.me.id);
+const canEditPlan = () => !isCloud() || state.role === 'personal';
+const uuid = () => { try { return crypto.randomUUID(); } catch (e) { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }); } };
+function must(r) { if (r && r.error) throw r.error; return r ? r.data : null; }
+function errText(e) {
+  const m = String((e && (e.message || e.error_description)) || e || '');
+  if (/Invalid login credentials/i.test(m)) return 'E-mail ou senha incorretos.';
+  if (/Email not confirmed/i.test(m)) return 'Confirme seu e-mail antes de entrar (veja a caixa de entrada).';
+  if (/already registered|already been registered/i.test(m)) return 'Já existe uma conta com esse e-mail. Use "Entrar".';
+  if (/Password should be at least/i.test(m)) return 'A senha precisa ter pelo menos 6 caracteres.';
+  if (/rate limit/i.test(m)) return 'Muitas tentativas seguidas. Espere alguns minutos e tente de novo.';
+  if (isNetErr(e)) return 'Sem conexão com a internet.';
+  return m || 'Algo deu errado. Tente de novo.';
+}
+function isNetErr(e) {
+  if (navigator.onLine === false) return true;
+  const m = String((e && (e.message || e.details)) || e || '');
+  return /Failed to fetch|NetworkError|Load failed|network|fetch failed|timed? ?out/i.test(m) || (e && e.status === 0);
+}
+
+const api = window.AXIS_TEST_API || {
+  getSession: async () => (await sb.auth.getSession()).data.session,
+  onAuth: cb => sb.auth.onAuthStateChange(cb),
+  signIn: async (email, password) => must(await sb.auth.signInWithPassword({ email, password })),
+  signUp: async (email, password, nome) => must(await sb.auth.signUp({ email, password, options: { data: { nome }, emailRedirectTo: APP_URL } })),
+  signOut: async () => { await sb.auth.signOut(); },
+  resetPassword: async email => must(await sb.auth.resetPasswordForEmail(email, { redirectTo: APP_URL })),
+  updatePassword: async password => must(await sb.auth.updateUser({ password })),
+  profile: async id => must(await sb.from('profiles').select('*').eq('id', id).maybeSingle()),
+  updateNome: async (id, nome) => must(await sb.from('profiles').update({ nome }).eq('id', id)),
+  meuCadastro: async id => must(await sb.from('alunos').select('*').eq('user_id', id).maybeSingle()),
+  alunos: async () => must(await sb.from('alunos').select('*').order('nome')),
+  criarAluno: async row => must(await sb.from('alunos').insert(row).select().single()),
+  atualizarAluno: async (id, patch) => must(await sb.from('alunos').update(patch).eq('id', id).select().single()),
+  apagarAluno: async id => must(await sb.from('alunos').delete().eq('id', id)),
+  usarConvite: async codigo => must(await sb.rpc('usar_convite', { codigo })),
+  dadosAluno: async id => {
+    const [f, s, c, a, m] = await Promise.all([
+      sb.from('fichas').select('plano, atualizado_em').eq('aluno_id', id).maybeSingle(),
+      sb.from('sessoes').select('id, data, treino, dados').eq('aluno_id', id).order('data'),
+      sb.from('corpo').select('id, data, kg').eq('aluno_id', id).order('data'),
+      sb.from('avaliacoes').select('*').eq('aluno_id', id).order('data'),
+      sb.from('comentarios').select('*').eq('aluno_id', id).order('criado_em')
+    ]);
+    return { ficha: must(f), sessoes: must(s), corpo: must(c), avaliacoes: must(a), comentarios: must(m) };
+  },
+  resumo: async (desdeData, desdeISO) => {
+    const [s, m, f] = await Promise.all([
+      sb.from('sessoes').select('aluno_id, data, treino').gte('data', desdeData),
+      sb.from('comentarios').select('id, aluno_id, sessao_id, autor_id, autor_papel, texto, criado_em').gte('criado_em', desdeISO).order('criado_em'),
+      sb.from('fichas').select('aluno_id, meta:plano->metaSemanal')
+    ]);
+    return { sessoes: must(s), comentarios: must(m), metas: must(f) };
+  },
+  upsert: async (t, row) => must(await sb.from(t).upsert(row)),
+  inserir: async (t, row) => must(await sb.from(t).upsert(row, { ignoreDuplicates: true })),
+  remove: async (t, id) => must(await sb.from(t).delete().eq('id', id)),
+  salvarAvaliacao: async row => must(await sb.from('avaliacoes').upsert(row).select().single()),
+  apagarAvaliacao: async id => must(await sb.from('avaliacoes').delete().eq('id', id)),
+  enviarFoto: async (path, blob) => must(await sb.storage.from('avaliacoes').upload(path, blob, { contentType: 'image/jpeg', upsert: true })),
+  urlsFotos: async paths => must(await sb.storage.from('avaliacoes').createSignedUrls(paths, 3600)),
+  apagarFotos: async paths => must(await sb.storage.from('avaliacoes').remove(paths))
+};
+
+/* Cache por aluno: o do próprio usuário fica salvo no celular para treinar sem internet */
+function cache(id) { return state.cache[id] || (state.cache[id] = { plan: null, sessions: [], corpo: [], avaliacoes: [], comentarios: [], loaded: false }); }
+function saveCtxCache() {
+  if (!state.me || state.ctx !== state.me.id) return;
+  const c = cache(state.me.id);
+  LS.set('c:data:' + state.me.id, { plan: c.plan, planAt: c.planAt, sessions: c.sessions, corpo: c.corpo, avaliacoes: c.avaliacoes, comentarios: c.comentarios });
+}
+function loadOwnCache() {
+  if (!state.me) return;
+  const d = LS.get('c:data:' + state.me.id, null);
+  if (!d) return;
+  const c = cache(state.me.id);
+  Object.assign(c, { plan: d.plan ? normalizePlan(d.plan) : null, planAt: d.planAt, sessions: d.sessions || [], corpo: d.corpo || [], avaliacoes: d.avaliacoes || [], comentarios: d.comentarios || [] });
+  c.corpoPrev = corpoMap(c.corpo);
+}
+const corpoMap = list => Object.fromEntries((list || []).map(x => [x.id, x.data + '|' + x.kg]));
+function setCtx(id) {
+  state.ctx = id;
+  const c = cache(id);
+  state.plan = c.plan || defaultPlan();
+  state.sessions = c.sessions;
+  state.corpo = c.corpo;
+  if (!c.corpoPrev) c.corpoPrev = corpoMap(c.corpo);
+}
+const ctxAluno = () => (state.me && state.ctx === state.me.id) ? state.me : state.alunos.find(a => a.id === state.ctx) || null;
+function alunoNome(id) { const a = (state.me && state.me.id === id) ? state.me : state.alunos.find(x => x.id === id); return a ? a.nome : 'Aluno'; }
+
+/* Fila de envio: tudo que muda vai para cá e é enviado quando houver internet */
+const outbox = () => LS.get('c:outbox', []);
+function enqueue(op) {
+  op.ts = Date.now() + Math.random();
+  const q = outbox().filter(x => x.k !== op.k);
+  q.push(op); LS.set('c:outbox', q);
+  renderChrome(); flushSoon();
+}
+let flushing = false, flushT;
+function flushSoon() { clearTimeout(flushT); flushT = setTimeout(flush, 250); }
+async function flush() {
+  if (!isCloud() || flushing || !state.user) return;
+  flushing = true;
+  let sent = 0;
+  try {
+    for (;;) {
+      const q = outbox();
+      if (!q.length) break;
+      const op = q[0];
+      try {
+        if (op.op === 'upsert') await api.upsert(op.t, op.row);
+        else if (op.op === 'insert') await api.inserir(op.t, op.row);
+        else await api.remove(op.t, op.id);
+        sent++;
+      } catch (e) {
+        if (isNetErr(e)) { state.syncErr = 'offline'; break; }
+        toast('Não consegui salvar uma alteração: ' + errText(e));
+      }
+      LS.set('c:outbox', outbox().filter(x => !(x.k === op.k && x.ts === op.ts)));
+      if (op.t === 'comentarios' && op.op === 'insert') { const m = (cache(op.aluno).comentarios || []).find(x => x.id === op.id); if (m) delete m.pendente; }
+    }
+    if (!outbox().length) state.syncErr = '';
+  } finally { flushing = false; renderChrome(); if (sent) render(); }
+}
+function overlay(t, alunoId, rows) {
+  let out = rows.slice();
+  for (const o of outbox()) {
+    if (o.t !== t || o.aluno !== alunoId) continue;
+    out = out.filter(r => r.id !== o.id);
+    if (o.op !== 'delete' && o.local) out.push(o.local);
+  }
+  return out;
+}
+const rowToSess = r => Object.assign({}, r.dados || {}, { id: r.id, data: r.data, treino: r.treino });
+const sessRow = (s, alunoId) => ({ id: s.id, aluno_id: alunoId, data: s.data, treino: s.treino, dados: s });
+
+async function pull(alunoId) {
+  const d = await api.dadosAluno(alunoId);
+  const c = cache(alunoId);
+  if (!outbox().some(o => o.t === 'fichas' && o.aluno === alunoId)) c.plan = d.ficha ? normalizePlan(d.ficha.plano) : null;
+  c.planAt = d.ficha ? d.ficha.atualizado_em : null;
+  c.sessions = overlay('sessoes', alunoId, (d.sessoes || []).map(rowToSess));
+  c.corpo = overlay('corpo', alunoId, (d.corpo || []).map(r => ({ id: r.id, data: r.data, kg: Number(r.kg) })));
+  c.corpoPrev = corpoMap(c.corpo);
+  c.avaliacoes = d.avaliacoes || [];
+  c.comentarios = overlay('comentarios', alunoId, d.comentarios || []);
+  c.loaded = true; c.at = Date.now();
+  if (state.ctx === alunoId) { setCtx(alunoId); saveCtxCache(); }
+}
+async function pullSafe(alunoId, quiet) {
+  try { await pull(alunoId); state.syncErr = ''; }
+  catch (e) { state.syncErr = isNetErr(e) ? 'offline' : 'erro'; if (!quiet && !isNetErr(e)) toast('Não consegui carregar: ' + errText(e)); }
+  render();
+}
+async function loadAlunos(quiet) {
+  try {
+    const list = await api.alunos();
+    state.alunos = (list || []).filter(a => a.user_id !== uid());
+    LS.set('c:alunos', state.alunos);
+    const d30 = new Date(Date.now() - 30 * 864e5), d60 = new Date(Date.now() - 60 * 864e5);
+    const r = await api.resumo(isoOf(d60), d30.toISOString());
+    state.resumo = { sessoes: r.sessoes || [], comentarios: r.comentarios || [], metas: Object.fromEntries((r.metas || []).map(m => [m.aluno_id, +m.meta || 4])) };
+    LS.set('c:resumo', state.resumo);
+    state.syncErr = '';
+  } catch (e) { state.syncErr = isNetErr(e) ? 'offline' : 'erro'; if (!quiet && !isNetErr(e)) toast('Não consegui carregar os alunos: ' + errText(e)); }
+  render();
+}
+
+/* Recados lidos (por aluno) */
+const seen = () => LS.get('c:seen', {});
+function markSeen(alunoId, list) {
+  const last = (list || []).reduce((m, x) => x.criado_em > m ? x.criado_em : m, '');
+  if (!last) return;
+  const s = seen(); if ((s[alunoId] || '') >= last) return;
+  s[alunoId] = last; LS.set('c:seen', s);
+}
+function unreadOf(alunoId, list) {
+  const s = seen()[alunoId] || '';
+  return (list || []).filter(m => m.aluno_id === alunoId && m.autor_id !== uid() && m.criado_em > s).length;
+}
+function fmtQuando(iso) {
+  const d = new Date(iso); if (isNaN(d)) return '';
+  const hm = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`, k = isoOf(d), t = todayISO();
+  if (k === t) return 'hoje ' + hm;
+  if (k === isoOf(new Date(Date.now() - 864e5))) return 'ontem ' + hm;
+  return fmtDM(k) + ' ' + hm;
+}
+
+/* ---------- Login ---------- */
+function viewCarregando() { return `<div class="card empty"><h2>Carregando…</h2><p>Abrindo sua conta.</p></div>`; }
+function viewLogin() {
+  const conv = LS.get('convite', null);
+  const signup = (state.loginMode || (conv ? 'signup' : 'signin')) === 'signup';
+  const leg = legacyData();
+  return `<div class="login">
+    <div class="hero"><div class="brand" style="display:inline-flex"><span class="brand-name">ÁXIS</span><span class="brand-rule" aria-hidden="true"></span><span class="brand-sub">Treinos com o seu personal</span></div>
+      <p>${signup ? 'Crie sua conta para acessar a sua ficha.' : 'Entre para acessar seus treinos.'}</p></div>
+    ${conv ? `<div class="card note small">Você recebeu um convite do seu personal (código <b>${esc(conv)}</b>). Crie sua conta para ver a sua ficha.</div>` : ''}
+    <div class="seg" role="group" aria-label="Entrar ou criar conta"><button type="button" data-action="login-mode" data-m="signin" aria-pressed="${!signup}">Entrar</button><button type="button" data-action="login-mode" data-m="signup" aria-pressed="${signup}">Criar conta</button></div>
+    <form id="auth-form" class="card stack" novalidate>
+      ${signup ? '<label class="field" for="au-nome"><span>Seu nome</span><input class="input" id="au-nome" autocomplete="name" required></label>' : ''}
+      <label class="field" for="au-email"><span>E-mail</span><input class="input" id="au-email" type="email" inputmode="email" autocomplete="email" required></label>
+      <label class="field" for="au-senha"><span>Senha${signup ? ' (mínimo 6 caracteres)' : ''}</span><input class="input" id="au-senha" type="password" autocomplete="${signup ? 'new-password' : 'current-password'}" minlength="6" required></label>
+      ${signup ? `<label class="field" for="au-conv"><span>Código de convite do personal</span><input class="input" id="au-conv" autocomplete="off" autocapitalize="characters" value="${esc(conv || '')}" placeholder="Ex.: 7F3K9QXZ"></label>` : ''}
+      <button type="submit" class="btn primary big block" id="au-go">${signup ? 'Criar conta' : 'Entrar'}</button>
+      ${!signup ? '<button type="button" class="btn ghost" data-action="forgot">Esqueci minha senha</button>' : ''}
+    </form>
+    ${leg.sessions.length && !LS.get('legado:migrado', null) ? `<p class="small muted" style="text-align:center">Os ${leg.sessions.length} treinos salvos neste celular continuam aqui. Depois de entrar, você pode enviá-los para a sua conta.</p>` : ''}
+  </div>`;
+}
+function viewConvite() {
+  return `<div class="login">
+    <div class="hero"><div class="brand" style="display:inline-flex"><span class="brand-name">ÁXIS</span><span class="brand-rule" aria-hidden="true"></span><span class="brand-sub">Quase lá</span></div>
+      <p>Digite o código que o seu personal te enviou para ligar a sua conta à sua ficha.</p></div>
+    <form id="conv-form" class="card stack" novalidate>
+      <label class="field" for="cv-code"><span>Código de convite</span><input class="input" id="cv-code" autocomplete="off" autocapitalize="characters" value="${esc(LS.get('convite', '') || '')}" placeholder="Ex.: 7F3K9QXZ"></label>
+      <button type="submit" class="btn primary big block">Continuar</button>
+    </form>
+    <button type="button" class="btn ghost" data-action="logout">Sair da conta ${esc(state.user ? state.user.email : '')}</button>
+  </div>`;
+}
+function legacyData() {
+  const s = LS.get('sessions', []), c = LS.get('corpo', []), p = LS.get('plan', null);
+  return { sessions: Array.isArray(s) ? s : [], corpo: Array.isArray(c) ? c : [], plan: validPlan(p) ? p : null };
+}
+
+function grabConvite() {
+  const m = location.hash.match(/^#convite-([A-Za-z0-9]{4,16})$/);
+  if (!m) return false;
+  LS.set('convite', m[1].toUpperCase()); state.loginMode = null;
+  try { history.replaceState(null, '', location.pathname); } catch (e) { /* ok */ }
+  return true;
+}
+async function bootCloud() {
+  state.mode = 'cloud';
+  if (!window.AXIS_TEST_API) {
+    try { sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'axis-auth' } }); }
+    catch (e) { state.mode = 'local'; render(); initStore(); return; }
+  }
+  grabConvite();
+  try {
+    api.onAuth((ev, session) => {
+      if (ev === 'PASSWORD_RECOVERY') setTimeout(askNewPassword, 300);
+      if (ev === 'SIGNED_OUT' && state.user) { resetCloud(); render(); }
+    });
+  } catch (e) { /* teste */ }
+  state.view = 'carregando'; render();
+  let session = null;
+  try { session = await api.getSession(); } catch (e) { session = null; }
+  if (!session) { state.view = 'login'; render(); return; }
+  await afterLogin(session.user);
+}
+function resetCloud() {
+  Object.assign(state, { user: null, profile: null, role: null, me: null, alunos: [], alunoSel: null, cache: {}, resumo: { sessoes: [], comentarios: [], metas: {} }, ctx: null, env: 'aluno', draft: null });
+  state.view = 'login';
+}
+async function afterLogin(user) {
+  state.user = user;
+  const cachedProf = LS.get('c:profile', null);
+  let prof = cachedProf && cachedProf.id === user.id ? cachedProf : null;
+  try { prof = (await api.profile(user.id)) || prof; if (prof) LS.set('c:profile', prof); } catch (e) { /* offline */ }
+  state.profile = prof;
+  state.role = prof && prof.papel === 'personal' ? 'personal' : 'aluno';
+  const cachedMe = LS.get('c:me', null);
+  let me = cachedMe && cachedMe.user_id === user.id ? cachedMe : null;
+  try { me = await api.meuCadastro(user.id); LS.set('c:me', me); } catch (e) { /* offline: usa o salvo */ }
+  if (!me && state.role === 'aluno') {
+    const code = LS.get('convite', null);
+    if (code) {
+      try { me = await api.usarConvite(code); LS.set('convite', null); LS.set('c:me', me); toast('Pronto! Sua conta está ligada à sua ficha.'); }
+      catch (e) { toast(errText(e)); }
+    }
+  }
+  state.me = me || null;
+  if (state.draft && state.me && state.draft.aluno && state.draft.aluno !== state.me.id) state.draft = null;
+  if (state.role === 'personal') {
+    state.env = LS.get('c:env', 'personal') === 'aluno' ? 'aluno' : 'personal';
+    state.alunos = LS.get('c:alunos', []) || [];
+    state.resumo = LS.get('c:resumo', null) || { sessoes: [], comentarios: [], metas: {} };
+  } else state.env = 'aluno';
+  if (state.me) { loadOwnCache(); setCtx(state.me.id); }
+  readHash(); render();
+  if (state.me) pullSafe(state.me.id, true);
+  if (state.role === 'personal') loadAlunos(true);
+  flush();
+}
+async function askNewPassword() {
+  const m = openSheet(`<form id="pw-form" class="stack"><h3>Nova senha</h3><p class="small muted">Digite a nova senha da sua conta.</p>
+    <label class="field" for="pw-new"><span>Nova senha (mínimo 6 caracteres)</span><input class="input" id="pw-new" type="password" autocomplete="new-password" minlength="6"></label>
+    <div class="row gap end"><button type="button" class="btn" data-action="sheet-close">Cancelar</button><button type="submit" class="btn primary">Salvar senha</button></div></form>`);
+  return m;
+}
+
+/* Folha (modal) genérica */
+let sheet = null;
+function openSheet(html) {
+  closeSheet();
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="box vbox" role="dialog" aria-modal="true">${html}</div>`;
+  m.addEventListener('click', e => { if (e.target === m) closeSheet(); });
+  document.body.appendChild(m); sheet = m;
+  const f = m.querySelector('input, select, textarea'); if (f) setTimeout(() => f.focus(), 50);
+  return m;
+}
+function closeSheet() { if (sheet) { sheet.remove(); sheet = null; } }
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && sheet) closeSheet(); });
+
+/* ---------- Ambiente do personal ---------- */
+const AV_HUES = ['A', 'B', 'C', 'D'];
+function avHue(nome) { let h = 0; for (const ch of String(nome)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return AV_HUES[h % 4]; }
+const initial = nome => esc((String(nome || '?').trim()[0] || '?').toUpperCase());
+function alunoStatus(a) {
+  const r = state.resumo || { sessoes: [], comentarios: [], metas: {} };
+  const ss = r.sessoes.filter(s => s.aluno_id === a.id).map(s => s.data).sort();
+  const last = ss[ss.length - 1] || null;
+  const ws = isoOf(weekStart(parseISO(todayISO())));
+  const week = ss.filter(d => d >= ws).length;
+  const meta = (r.metas || {})[a.id] || 4;
+  const unread = unreadOf(a.id, r.comentarios);
+  let quando = 'Ainda não treinou pelo app';
+  if (last) { const dd = Math.round((parseISO(todayISO()) - parseISO(last)) / 864e5); quando = dd === 0 ? 'Treinou hoje' : dd === 1 ? 'Treinou ontem' : `Treinou há ${dd} dias`; }
+  return { last, week, meta, unread, quando };
+}
+function viewAlunos() {
+  const q = (state.busca || '').trim().toLowerCase();
+  const list = state.alunos.filter(a => !q || a.nome.toLowerCase().includes(q));
+  const ativos = list.filter(a => a.ativo !== false), inativos = list.filter(a => a.ativo === false);
+  const st = state.alunos.filter(a => a.ativo !== false).map(alunoStatus);
+  const treinaram = st.filter(x => x.week > 0).length, recados = st.reduce((n, x) => n + x.unread, 0);
+  let html = `<div class="row between gap" style="margin-bottom:12px"><div><div class="kicker" style="color:var(--gold)">Personal</div><h2 class="dtitle">Seus alunos</h2></div><button type="button" class="btn primary" data-action="novo-aluno">+ Novo aluno</button></div>`;
+  if (!state.alunos.length) return html + emptyBlock('Cadastre seu primeiro aluno', 'Você cria o cadastro e monta a ficha. O app gera um convite para o aluno criar a conta e já ver tudo no celular.', 'Cadastrar aluno', 'novo-aluno');
+  html += `<div class="card" style="margin-bottom:12px"><div class="sumgrid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat"><small>Ativos</small><b>${state.alunos.filter(a => a.ativo !== false).length}</b></div>
+    <div class="stat"><small>Treinaram na semana</small><b>${treinaram}</b></div>
+    <div class="stat"><small>Recados novos</small><b>${recados}</b></div></div></div>`;
+  if (state.alunos.length > 6) html += `<input class="input" id="busca" placeholder="Buscar aluno" value="${esc(state.busca || '')}" autocomplete="off" style="margin-bottom:10px">`;
+  const card = a => {
+    const s = alunoStatus(a);
+    return `<button type="button" class="acard" data-action="open-aluno" data-id="${esc(a.id)}" style="${tv(avHue(a.nome))}">
+      <span class="av">${initial(a.nome)}</span>
+      <span class="grow"><b>${esc(a.nome)}</b><small>${esc(s.quando)} · ${s.week} de ${s.meta} na semana</small></span>
+      ${!a.user_id ? '<span class="pill wait">Convite pendente</span>' : ''}${s.unread ? `<span class="count" aria-label="${s.unread} recados novos">${s.unread}</span>` : ''}
+    </button>`;
+  };
+  html += `<div class="stack">${ativos.map(card).join('')}</div>`;
+  if (inativos.length) html += `<h3 class="sec">Inativos</h3><div class="stack">${inativos.map(card).join('')}</div>`;
+  html += `<button type="button" class="btn ghost block" data-action="refresh" style="margin-top:12px">Atualizar</button>`;
+  return html;
+}
+const ATABS = [['resumo', 'Resumo'], ['ficha', 'Ficha'], ['treinos', 'Treinos'], ['evolucao', 'Evolução'], ['avaliacoes', 'Avaliações']];
+function viewAluno() {
+  const a = state.alunos.find(x => x.id === state.alunoSel);
+  if (!a) return emptyBlock('Aluno não encontrado', 'Volte para a lista de alunos.', 'Ver alunos', 'go-alunos');
+  if (state.ctx !== a.id) setCtx(a.id);
+  const c = cache(a.id);
+  const tab = state.alunoTab || 'resumo';
+  let html = `<button type="button" class="back" data-action="go-alunos">‹ Alunos</button>
+    <div class="ahead" style="${tv(avHue(a.nome))}"><span class="av big">${initial(a.nome)}</span><div class="grow"><h2>${esc(a.nome)}</h2><p>${esc(a.objetivo || 'Sem objetivo cadastrado')}${a.ativo === false ? ' · inativo' : ''}</p></div><button type="button" class="btn sm" data-action="edit-aluno">Editar</button></div>
+    <div class="subtabs" role="group" aria-label="Seções do aluno">${ATABS.map(([k, l]) => `<button type="button" data-action="aluno-tab" data-t="${k}" aria-pressed="${tab === k}">${l}</button>`).join('')}</div>`;
+  if (!c.loaded) { if (!c.loading) { c.loading = true; pullSafe(a.id, false).finally(() => { c.loading = false; }); } return html + `<div class="card empty"><p>Carregando os dados de ${esc(a.nome)}…</p></div>`; }
+  if (tab === 'resumo') html += viewAlunoResumo(a, c);
+  else if (tab === 'ficha') html += viewFicha();
+  else if (tab === 'treinos') { html += viewHistorico(); markSeen(a.id, c.comentarios); }
+  else if (tab === 'evolucao') html += viewEvolucao();
+  else html += viewAvaliacoes(true);
+  return html;
+}
+function conviteMsg(a) { return `Oi, ${a.nome.split(' ')[0]}! Sua ficha de treino está no app ÁXIS. Crie sua conta por este link: ${APP_URL}#convite-${a.convite} (código ${a.convite})`; }
+function conviteCard(a) {
+  return `<div class="card stack note"><div><b>${esc(a.nome.split(' ')[0])} ainda não entrou no app</b><p class="small">Envie o convite. Pelo link, a conta já fica ligada à ficha.</p></div>
+    <div class="row gap"><span class="topic">${esc(a.convite)}</span><button type="button" class="btn sm" data-action="copiar-convite" data-id="${esc(a.id)}">Copiar mensagem</button></div>
+    <a class="btn primary" href="https://wa.me/?text=${encodeURIComponent(conviteMsg(a))}" target="_blank" rel="noopener">Enviar pelo WhatsApp</a></div>`;
+}
+function viewAlunoResumo(a, c) {
+  const ss = sortedSessions();
+  const last = ss[ss.length - 1];
+  const geral = (c.comentarios || []).filter(m => !m.sessao_id);
+  markSeen(a.id, geral);
+  let html = '';
+  if (!a.user_id) html += conviteCard(a) + '<div style="height:12px"></div>';
+  html += weekCard();
+  html += `<h3 class="sec">Último treino</h3>`;
+  html += last ? `<button type="button" class="acard" data-action="aluno-tab" data-t="treinos" style="${tv(last.treino)}"><span class="hl">${esc(last.treino)}</span><span class="grow"><b>${esc(fmtDia(last.data))}</b><small>${Object.keys(last.itens || {}).length} exercícios${last.duracaoMin ? ' · ' + fmtDur(last.duracaoMin) : ''}${last.nota ? ' · “' + esc(last.nota) + '”' : ''}</small></span><span class="chev" aria-hidden="true">›</span></button>` : `<p class="muted small">Nenhum treino registrado ainda.</p>`;
+  const av = (c.avaliacoes || []).slice().sort((x, y) => x.data < y.data ? 1 : -1)[0];
+  html += `<h3 class="sec">Última avaliação</h3>`;
+  html += av ? `<button type="button" class="acard" data-action="av-open" data-id="${esc(av.id)}"><span class="grow"><b>${esc(fmtDMY(av.data))}</b><small>${avResumo(av)}</small></span><span class="chev" aria-hidden="true">›</span></button>` : `<p class="muted small">Nenhuma avaliação física ainda. <button type="button" class="linkbtn" data-action="av-new" style="display:inline">Fazer agora</button></p>`;
+  if (a.observacoes) html += `<h3 class="sec">Observações</h3><div class="card small" style="white-space:pre-wrap">${esc(a.observacoes)}</div>`;
+  html += `<h3 class="sec">Recados</h3><div class="card">${thread(a.id, '')}</div>`;
+  return html;
+}
+function viewRecados() {
+  const r = state.resumo || { comentarios: [] };
+  const by = {};
+  for (const m of r.comentarios) (by[m.aluno_id] = by[m.aluno_id] || []).push(m);
+  const ids = Object.keys(by).filter(id => state.alunos.some(a => a.id === id)).sort((x, y) => { const lx = by[x][by[x].length - 1].criado_em, ly = by[y][by[y].length - 1].criado_em; return lx < ly ? 1 : -1; });
+  let html = `<div style="margin-bottom:12px"><div class="kicker" style="color:var(--gold)">Personal</div><h2 class="dtitle">Recados</h2><p class="small muted">Mensagens dos últimos 30 dias, das mais recentes para as mais antigas.</p></div>`;
+  if (!ids.length) return html + emptyBlock('Nenhum recado ainda', 'Quando um aluno comentar um treino ou mandar um recado, aparece aqui.', null, null);
+  html += ids.map(id => {
+    const a = state.alunos.find(x => x.id === id), list = by[id], u = unreadOf(id, list);
+    const lastMsgs = list.slice(-3);
+    const toSess = list[list.length - 1].sessao_id;
+    return `<div class="card stack" style="${tv(avHue(a.nome))};margin-bottom:10px">
+      <div class="row gap"><span class="av">${initial(a.nome)}</span><div class="grow"><b>${esc(a.nome)}</b>${u ? ` <span class="count">${u}</span>` : ''}</div><button type="button" class="btn sm" data-action="open-aluno" data-id="${esc(id)}" data-t="${toSess ? 'treinos' : 'resumo'}" data-s="${esc(toSess || '')}">Abrir</button></div>
+      <div class="thread">${lastMsgs.map(m => `<div class="msg${m.autor_id === uid() ? ' mine' : ''}"><div class="who">${m.autor_papel === 'personal' ? 'Você' : esc(a.nome.split(' ')[0])} · ${fmtQuando(m.criado_em)}${m.sessao_id ? ' · sobre um treino' : ''}</div><div class="txt">${esc(m.texto)}</div></div>`).join('')}</div>
+    </div>`;
+  }).join('');
+  return html;
+}
+function ajustesAparelho() {
+  const s = state.settings;
+  return `<div class="card stack">
+    <label class="field" for="s-rest"><span>Descanso entre séries</span><select class="input" id="s-rest">${[30, 45, 60, 75, 90, 120, 150, 180].map(v => `<option value="${v}"${+s.rest === v ? ' selected' : ''}>${v < 60 ? v + ' s' : Math.floor(v / 60) + ' min' + (v % 60 ? ' ' + (v % 60) + ' s' : '')}</option>`).join('')}</select></label>
+    <label class="toggle" for="s-auto"><input type="checkbox" id="s-auto"${s.autoRest ? ' checked' : ''}> Iniciar o descanso ao marcar uma série</label>
+    <label class="field" for="s-som"><span>Som no fim do descanso</span><select class="input" id="s-som">
+      <option value="normal"${s.som !== 'alto' && s.som !== 'off' ? ' selected' : ''}>Ligado</option>
+      ${'audioSession' in navigator ? `<option value="alto"${s.som === 'alto' ? ' selected' : ''}>Ligado até no modo silencioso (pausa a música)</option>` : ''}
+      <option value="off"${s.som === 'off' ? ' selected' : ''}>Desligado</option></select></label>
+    <button type="button" class="btn sm" data-action="test-sound" style="align-self:flex-start">Testar som</button>
+    <label class="toggle" for="s-tela"><input type="checkbox" id="s-tela"${s.telaLigada !== false ? ' checked' : ''}> Manter a tela ligada durante o treino</label>
+    <label class="field" for="s-aviso"><span>Aviso quando o descanso acabar, fora do app</span><select class="input" id="s-aviso">
+      <option value="off"${s.aviso === 'off' ? ' selected' : ''}>Desligado</option>
+      <option value="ntfy"${s.aviso === 'ntfy' ? ' selected' : ''}>App ntfy (iPhone e Android)</option>
+      <option value="nav"${s.aviso === 'nav' ? ' selected' : ''}>Notificação do navegador (Android)</option></select></label>
+    ${s.aviso === 'ntfy' ? ntfyCard() : ''}
+    ${s.aviso === 'nav' && notifHint() ? `<p class="small muted" style="margin-top:-4px">${notifHint()}</p>` : ''}
+    <label class="field" for="s-step"><span>Passo dos botões − e + (kg)</span><select class="input" id="s-step">${[1, 2, 2.5, 5].map(v => `<option value="${v}"${+s.step === v ? ' selected' : ''}>${nf.format(v)} kg</option>`).join('')}</select></label>
+  </div>`;
+}
+function contaCard() {
+  const p = state.profile || {};
+  const pend = outbox().length;
+  return `<div class="card stack">
+    <label class="field" for="pf-nome"><span>Seu nome</span><input class="input" id="pf-nome" value="${esc(p.nome || '')}" autocomplete="name"></label>
+    <p class="small muted">${esc(state.user ? state.user.email : '')} · ${state.role === 'personal' ? 'conta de personal' : 'conta de aluno'}</p>
+    ${pend ? `<p class="small" style="color:var(--bad)">${pend} ${pend === 1 ? 'alteração ainda não enviada' : 'alterações ainda não enviadas'} (sem internet).</p>` : ''}
+    <div class="row gap wrap"><button type="button" class="btn grow" data-action="salvar-nome">Salvar nome</button><button type="button" class="btn danger grow" data-action="logout">Sair da conta</button></div>
+  </div>`;
+}
+function viewConta() {
+  return `<div style="margin-bottom:12px"><div class="kicker" style="color:var(--gold)">Personal</div><h2 class="dtitle">Conta</h2></div>
+    ${contaCard()}
+    <h3 class="sec">Como convidar um aluno</h3>
+    <div class="card small stack"><p>1. Em <b>Alunos</b>, toque em <b>+ Novo aluno</b> e monte a ficha.</p><p>2. Envie o convite pelo WhatsApp. O aluno abre o link, cria a conta e já vê a ficha.</p><p>3. Os treinos, cargas e recados do aluno aparecem aqui na hora.</p></div>
+    <h3 class="sec">Ajustes deste celular</h3>${ajustesAparelho()}`;
+}
+function envBar() {
+  if (!isCloud() || state.role !== 'personal' || ['login', 'convite', 'carregando'].includes(state.view)) return '';
+  return `<div class="envbar" role="group" aria-label="Ambiente"><button type="button" data-action="env" data-env="personal" aria-pressed="${state.env === 'personal'}">Personal</button><button type="button" data-action="env" data-env="aluno" aria-pressed="${state.env === 'aluno'}">Meu treino</button></div>`;
+}
+
+/* ---------- Comentários ---------- */
+function thread(alunoId, sessaoId) {
+  const c = cache(alunoId);
+  const list = (c.comentarios || []).filter(m => (m.sessao_id || '') === (sessaoId || '')).sort((x, y) => x.criado_em < y.criado_em ? -1 : 1);
+  const nome = alunoNome(alunoId).split(' ')[0];
+  const fid = 'cm-' + (sessaoId || 'geral');
+  const ph = state.env === 'personal' ? `Escreva para ${nome}` : (state.role === 'personal' ? 'Anotação sua' : 'Escreva para o seu personal');
+  return `<div class="thread">${list.map(m => `<div class="msg${m.autor_id === uid() ? ' mine' : ''}"><div class="who">${m.autor_id === uid() ? 'Você' : (m.autor_papel === 'personal' ? 'Personal' : esc(nome))} · ${m.pendente ? 'enviando…' : fmtQuando(m.criado_em)}${m.autor_id === uid() ? `<button type="button" class="xbtn" data-action="del-msg" data-id="${esc(m.id)}" data-aluno="${esc(alunoId)}" aria-label="Apagar mensagem">✕</button>` : ''}</div><div class="txt">${esc(m.texto)}</div></div>`).join('')}
+    <form class="row gap msgform" data-aluno="${esc(alunoId)}" data-s="${esc(sessaoId || '')}"><input class="input" id="${esc(fid)}" name="t" placeholder="${esc(ph)}" maxlength="2000" autocomplete="off"><button type="submit" class="btn sm primary">Enviar</button></form></div>`;
+}
+function sendComment(alunoId, sessaoId, texto) {
+  const m = { id: uuid(), aluno_id: alunoId, sessao_id: sessaoId || null, texto, autor_id: uid(), autor_papel: state.env === 'personal' || state.role === 'personal' ? 'personal' : 'aluno', criado_em: new Date().toISOString(), pendente: true };
+  const c = cache(alunoId); c.comentarios = (c.comentarios || []).concat(m);
+  if (state.resumo && state.env === 'personal') state.resumo.comentarios = (state.resumo.comentarios || []).concat(m);
+  markSeen(alunoId, [m]);
+  saveCtxCache();
+  enqueue({ k: 'comentarios:' + m.id, t: 'comentarios', op: 'insert', id: m.id, aluno: alunoId, row: { id: m.id, aluno_id: alunoId, sessao_id: m.sessao_id, texto }, local: m });
+  render();
+}
+
+/* ---------- Avaliação física ---------- */
+const MEDIDAS = [['pescoco', 'Pescoço'], ['ombro', 'Ombros'], ['torax', 'Tórax'], ['bracoD', 'Braço direito'], ['bracoE', 'Braço esquerdo'], ['cintura', 'Cintura'], ['abdomen', 'Abdômen'], ['quadril', 'Quadril'], ['coxaD', 'Coxa direita'], ['coxaE', 'Coxa esquerda'], ['pantD', 'Panturrilha direita'], ['pantE', 'Panturrilha esquerda']];
+const FOTO_SLOTS = [['frente', 'Frente'], ['lado', 'Lado'], ['costas', 'Costas'], ['extra', 'Extra']];
+function imcOf(d) { const p = +d.peso, h = +d.altura / 100; return p > 0 && h > 0 ? Math.round(p / (h * h) * 10) / 10 : null; }
+function imcLabel(v) { return v == null ? '' : v < 18.5 ? 'abaixo do peso' : v < 25 ? 'peso adequado' : v < 30 ? 'sobrepeso' : 'obesidade'; }
+function avResumo(av) {
+  const d = av.dados || {}, parts = [];
+  if (d.peso) parts.push(`${nf.format(d.peso)} kg`);
+  if (d.gordura) parts.push(`${nf.format(d.gordura)}% de gordura`);
+  const i = imcOf(d); if (i) parts.push(`IMC ${nf.format(i)}`);
+  if (d.medidas && d.medidas.cintura) parts.push(`cintura ${nf.format(d.medidas.cintura)} cm`);
+  if ((av.fotos || []).length) parts.push(`${av.fotos.length} ${av.fotos.length === 1 ? 'foto' : 'fotos'}`);
+  return esc(parts.join(' · ') || 'Sem medidas');
+}
+function viewAvaliacoes(editable) {
+  const list = (cache(state.ctx).avaliacoes || []).slice().sort((a, b) => a.data < b.data ? 1 : -1);
+  let html = editable ? `<button type="button" class="btn primary block" data-action="av-new" style="margin-bottom:12px">+ Nova avaliação</button>` : '';
+  if (!list.length) return html + emptyBlock('Nenhuma avaliação ainda', editable ? 'Registre peso, medidas, % de gordura e fotos para acompanhar a evolução do aluno.' : 'Quando o seu personal fizer a sua avaliação física, ela aparece aqui.', null, null);
+  const last = list[0], first = list[list.length - 1];
+  const diff = (k, sub) => { const g = x => sub ? ((x.dados || {}).medidas || {})[k] : (x.dados || {})[k]; const a = +g(last), b = +g(first); return a && b && list.length > 1 ? Math.round((a - b) * 10) / 10 : null; };
+  const box = (label, val, unit, d) => `<div class="stat"><small>${label}</small><b>${val == null || val === '' ? '—' : esc(nf.format(val)) + unit}</b>${d != null ? `<small style="text-transform:none;letter-spacing:0">${d > 0 ? '+' : ''}${esc(nf.format(d))}${unit} desde ${esc(fmtDM(first.data))}</small>` : ''}</div>`;
+  const L = last.dados || {};
+  html += `<div class="card"><div class="stats">
+    ${box('Peso', L.peso, ' kg', diff('peso'))}
+    ${box('Gordura', L.gordura, '%', diff('gordura'))}
+    ${box('Cintura', (L.medidas || {}).cintura, ' cm', diff('cintura', true))}
+    ${box('IMC', imcOf(L), '', null)}
+  </div></div><h3 class="sec">Histórico de avaliações</h3><div class="stack">`;
+  html += list.map(av => `<button type="button" class="acard" data-action="av-open" data-id="${esc(av.id)}"><span class="grow"><b>${esc(fmtDMY(av.data))}</b><small>${avResumo(av)}</small></span><span class="chev" aria-hidden="true">›</span></button>`).join('');
+  return html + '</div>';
+}
+const photoUrls = {};
+async function signedUrls(paths) {
+  const need = paths.filter(p => !photoUrls[p] || photoUrls[p].exp < Date.now());
+  if (need.length) {
+    try { const r = await api.urlsFotos(need); (r || []).forEach(x => { if (x.signedUrl) photoUrls[x.path] = { url: x.signedUrl, exp: Date.now() + 50 * 60000 }; }); }
+    catch (e) { /* sem internet */ }
+  }
+  return Object.fromEntries(paths.map(p => [p, photoUrls[p] ? photoUrls[p].url : null]));
+}
+async function openAvaliacao(id, cmpId) {
+  const c = cache(state.ctx), list = (c.avaliacoes || []).slice().sort((a, b) => a.data < b.data ? -1 : 1);
+  const av = list.find(x => x.id === id); if (!av) return;
+  const idx = list.indexOf(av);
+  const cmp = cmpId ? list.find(x => x.id === cmpId) : list[idx - 1];
+  const d = av.dados || {}, p = cmp ? (cmp.dados || {}) : null;
+  const editable = state.role === 'personal' && state.env === 'personal';
+  const row = (label, v, pv, unit) => {
+    if ((v == null || v === '') && (pv == null || pv === '')) return '';
+    const dd = v != null && v !== '' && pv != null && pv !== '' ? Math.round((v - pv) * 10) / 10 : null;
+    return `<tr><td>${label}</td><td class="n">${v == null || v === '' ? '—' : esc(nf.format(v)) + unit}</td>${cmp ? `<td class="n muted">${pv == null || pv === '' ? '—' : esc(nf.format(pv)) + unit}</td><td class="n">${dd == null ? '—' : (dd > 0 ? '+' : '') + esc(nf.format(dd))}</td>` : ''}</tr>`;
+  };
+  const urls = await signedUrls(av.fotos || []);
+  const m = openSheet(`<div class="row gap between" style="align-items:flex-start"><div><div class="kicker" style="color:var(--gold)">Avaliação física · ${esc(alunoNome(state.ctx))}</div><h3>${esc(fmtDMY(av.data))}</h3></div><button type="button" class="xbtn" data-action="sheet-close" aria-label="Fechar">✕</button></div>
+    ${list.length > 1 ? `<label class="field" for="av-cmp"><span>Comparar com</span><select class="input" id="av-cmp" data-id="${esc(av.id)}"><option value="">Não comparar</option>${list.filter(x => x.id !== av.id).map(x => `<option value="${esc(x.id)}"${cmp && cmp.id === x.id ? ' selected' : ''}>${esc(fmtDMY(x.data))}</option>`).join('')}</select></label>` : ''}
+    <div class="tscroll"><table class="t cmp"><thead><tr><th>Medida</th><th class="n">${esc(fmtDM(av.data))}</th>${cmp ? `<th class="n">${esc(fmtDM(cmp.data))}</th><th class="n">Dif.</th>` : ''}</tr></thead><tbody>
+      ${row('Peso', d.peso, p && p.peso, ' kg')}${row('Altura', d.altura, p && p.altura, ' cm')}${row('IMC', imcOf(d), p && imcOf(p), '')}
+      ${row('Gordura', d.gordura, p && p.gordura, '%')}${row('Massa magra', d.peso && d.gordura ? Math.round(d.peso * (1 - d.gordura / 100) * 10) / 10 : null, p && p.peso && p.gordura ? Math.round(p.peso * (1 - p.gordura / 100) * 10) / 10 : null, ' kg')}
+      ${MEDIDAS.map(([k, l]) => row(l, (d.medidas || {})[k], p && (p.medidas || {})[k], ' cm')).join('')}
+    </tbody></table></div>
+    ${imcOf(d) ? `<p class="small muted">IMC ${esc(nf.format(imcOf(d)))}: ${imcLabel(imcOf(d))} pela tabela da OMS.</p>` : ''}
+    ${d.obs ? `<p class="small" style="white-space:pre-wrap"><b>Observações:</b> ${esc(d.obs)}</p>` : ''}
+    ${(av.fotos || []).length ? `<div class="photos">${av.fotos.map(f => `<div class="photo">${urls[f] ? `<a href="${esc(urls[f])}" target="_blank" rel="noopener"><img src="${esc(urls[f])}" alt="Foto ${esc(fotoSlotName(f))}"></a>` : '<small class="muted">Sem internet</small>'}<span>${esc(fotoSlotName(f))}</span></div>`).join('')}</div>` : ''}
+    ${editable ? `<div class="row gap"><button type="button" class="btn danger" data-action="av-del" data-id="${esc(av.id)}">Excluir</button><button type="button" class="btn primary grow" data-action="av-edit" data-id="${esc(av.id)}">Editar</button></div>` : ''}`);
+  return m;
+}
+function fotoSlotName(path) { const k = String(path).split('/').pop().split('-')[0]; const s = FOTO_SLOTS.find(x => x[0] === k); return s ? s[1] : 'Foto'; }
+let avForm = null;
+async function avFormOpen(id) {
+  const c = cache(state.ctx), av = id ? (c.avaliacoes || []).find(x => x.id === id) : null;
+  const d = av ? (av.dados || {}) : {};
+  const prev = (c.avaliacoes || []).slice().sort((a, b) => a.data < b.data ? 1 : -1)[0];
+  avForm = { id: av ? av.id : uuid(), editing: !!av, fotos: Object.fromEntries((av ? av.fotos : []).map(f => [String(f).split('/').pop().split('-')[0], f])), novas: {}, removidas: [] };
+  const urls = await signedUrls(Object.values(avForm.fotos));
+  const num = (fid, label, val, unit, ph) => `<label class="field" for="${fid}"><span>${label}${unit ? ' (' + unit + ')' : ''}</span><input class="input" id="${fid}" inputmode="decimal" autocomplete="off" value="${val == null ? '' : esc(nfIn.format(val))}" placeholder="${esc(ph || '')}"></label>`;
+  openSheet(`<form id="av-form" class="stack" novalidate>
+    <div class="row gap between" style="align-items:flex-start"><div><div class="kicker" style="color:var(--gold)">${esc(alunoNome(state.ctx))}</div><h3>${av ? 'Editar avaliação' : 'Nova avaliação'}</h3></div><button type="button" class="xbtn" data-action="sheet-close" aria-label="Fechar">✕</button></div>
+    <label class="field" for="av-data"><span>Data</span><input class="input" type="date" id="av-data" value="${esc(av ? av.data : todayISO())}" max="${todayISO()}"></label>
+    <div class="avgrid">
+      ${num('av-peso', 'Peso', d.peso, 'kg', prev && prev.dados && prev.dados.peso ? nfIn.format(prev.dados.peso) : '')}
+      ${num('av-altura', 'Altura', d.altura, 'cm', prev && prev.dados && prev.dados.altura ? nfIn.format(prev.dados.altura) : '')}
+      ${num('av-gordura', 'Gordura', d.gordura, '%', '')}
+    </div>
+    <h3 class="sec" style="margin:8px 0 0">Medidas (cm)</h3>
+    <div class="avgrid">${MEDIDAS.map(([k, l]) => num('av-m-' + k, l, (d.medidas || {})[k], '', '')).join('')}</div>
+    <label class="field" for="av-obs"><span>Observações</span><textarea class="input" id="av-obs" rows="3">${esc(d.obs || '')}</textarea></label>
+    <h3 class="sec" style="margin:8px 0 0">Fotos</h3>
+    <div class="photos">${FOTO_SLOTS.map(([k, l]) => `<div class="photo" id="ph-${k}">${avForm.fotos[k] && urls[avForm.fotos[k]] ? `<img src="${esc(urls[avForm.fotos[k]])}" alt="">` : '<small class="muted">Toque para adicionar</small>'}<span>${l}</span><label for="av-f-${k}" aria-label="Foto ${l}"></label><input type="file" id="av-f-${k}" class="sr-only" accept="image/*" data-slot="${k}"></div>`).join('')}</div>
+    <p class="small muted">As fotos ficam guardadas com segurança: só você e o aluno conseguem ver.</p>
+    <button type="submit" class="btn primary big block" id="av-go">Salvar avaliação</button>
+  </form>`);
+}
+async function compressImage(file, max = 1400, q = 0.82) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const cv = document.createElement('canvas'); cv.width = Math.round(img.naturalWidth * s); cv.height = Math.round(img.naturalHeight * s);
+    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+    return await new Promise(res => cv.toBlob(res, 'image/jpeg', q));
+  } finally { URL.revokeObjectURL(url); }
+}
+async function avSave() {
+  const f = avForm; if (!f) return;
+  const val = id => { const el = document.getElementById(id); return el ? parseNum(el.value) : null; };
+  const dados = { peso: val('av-peso'), altura: val('av-altura'), gordura: val('av-gordura'), medidas: {}, obs: ($('#av-obs').value || '').trim() };
+  for (const [k] of MEDIDAS) { const v = val('av-m-' + k); if (v != null) dados.medidas[k] = v; }
+  const bad = Object.entries({ peso: dados.peso, altura: dados.altura, gordura: dados.gordura, ...dados.medidas }).find(([, v]) => Number.isNaN(v));
+  if (bad) { toast('Há um número inválido. Use só números, como 72,5.'); return; }
+  if (dados.gordura != null && (dados.gordura <= 0 || dados.gordura >= 70)) { toast('Confira a % de gordura.'); return; }
+  const data = $('#av-data').value || todayISO();
+  if (navigator.onLine === false) { toast('Sem internet: a avaliação precisa de conexão para ser salva.'); return; }
+  const btn = $('#av-go'); if (btn) { btn.disabled = true; btn.textContent = 'Salvando…'; }
+  try {
+    const alunoId = state.ctx;
+    for (const [slot, blob] of Object.entries(f.novas)) {
+      const path = `${alunoId}/${f.id}/${slot}-${Date.now().toString(36)}.jpg`;
+      await api.enviarFoto(path, blob);
+      if (f.fotos[slot]) f.removidas.push(f.fotos[slot]);
+      f.fotos[slot] = path;
+    }
+    const fotos = FOTO_SLOTS.map(([k]) => f.fotos[k]).filter(Boolean);
+    const saved = await api.salvarAvaliacao({ id: f.id, aluno_id: alunoId, data, dados, fotos });
+    if (f.removidas.length) api.apagarFotos(f.removidas).catch(() => {});
+    const c = cache(alunoId); c.avaliacoes = (c.avaliacoes || []).filter(x => x.id !== f.id).concat(saved || { id: f.id, aluno_id: alunoId, data, dados, fotos });
+    avForm = null; closeSheet(); render(); toast('Avaliação salva');
+  } catch (e) {
+    toast('Não consegui salvar: ' + errText(e));
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar avaliação'; }
+  }
+}
+
+/* ---------- Ações da nuvem ---------- */
+async function novoAlunoSubmit() {
+  const nome = ($('#na-nome').value || '').trim();
+  if (!nome) { toast('Digite o nome do aluno.'); $('#na-nome').focus(); return; }
+  const objetivo = ($('#na-obj').value || '').trim() || null;
+  const base = $('#na-ficha').value;
+  let plan = defaultPlan();
+  if (base === 'vazia') plan = Object.assign(defaultPlan(), { treinos: [{ id: 'A', nome: 'Treino A', exercicios: [] }, { id: 'B', nome: 'Treino B', exercicios: [] }] });
+  else if (base && base !== 'padrao') {
+    try { if (!cache(base).loaded) await pull(base); plan = clone(cache(base).plan || defaultPlan()); } catch (e) { toast('Não consegui copiar a ficha: ' + errText(e)); return; }
+  }
+  try {
+    const a = await api.criarAluno({ personal_id: uid(), nome, objetivo });
+    state.alunos = state.alunos.concat(a).sort((x, y) => x.nome.localeCompare(y.nome));
+    LS.set('c:alunos', state.alunos);
+    await api.upsert('fichas', { aluno_id: a.id, plano: plan });
+    const c = cache(a.id); Object.assign(c, { plan: normalizePlan(plan), sessions: [], corpo: [], avaliacoes: [], comentarios: [], loaded: true });
+    closeSheet();
+    state.alunoSel = a.id; state.alunoTab = 'resumo';
+    if (location.hash !== '#aluno') location.hash = 'aluno'; else render();
+    toast(`${nome} cadastrado. Agora é só enviar o convite.`);
+  } catch (e) { toast('Não consegui cadastrar: ' + errText(e)); }
+}
+async function editAlunoSubmit() {
+  const a = state.alunos.find(x => x.id === state.alunoSel); if (!a) return;
+  const nome = ($('#ea-nome').value || '').trim();
+  if (!nome) { toast('Digite o nome do aluno.'); return; }
+  try {
+    const up = await api.atualizarAluno(a.id, { nome, objetivo: ($('#ea-obj').value || '').trim() || null, observacoes: ($('#ea-obs').value || '').trim() || null, ativo: $('#ea-ativo').checked });
+    state.alunos = state.alunos.map(x => x.id === a.id ? up : x); LS.set('c:alunos', state.alunos);
+    closeSheet(); render(); toast('Dados salvos');
+  } catch (e) { toast('Não consegui salvar: ' + errText(e)); }
+}
+const cloudActions = {
+  'login-mode': b => { state.loginMode = b.dataset.m; render(); },
+  forgot: async () => {
+    const email = ($('#au-email') && $('#au-email').value || '').trim();
+    if (!email) { toast('Digite seu e-mail no campo acima e toque de novo.'); return; }
+    try { await api.resetPassword(email); toast('Enviamos um link para criar uma nova senha. Veja seu e-mail.'); }
+    catch (e) { toast(errText(e)); }
+  },
+  logout: async () => {
+    const pend = outbox().length;
+    if (!await ask('Sair da conta?', pend ? `Há ${pend} alterações que ainda não foram enviadas e serão perdidas.` : 'Você vai precisar do e-mail e da senha para entrar de novo.', 'Sair', true)) return;
+    try { await api.signOut(); } catch (e) { /* ok */ }
+    Object.keys(localStorage).filter(k => k.startsWith('mt:c:')).forEach(k => { try { localStorage.removeItem(k); } catch (e) { /* ok */ } });
+    LS.set('draft', null); stopTimer();
+    resetCloud(); try { history.replaceState(null, '', location.pathname); } catch (e) { /* ok */ }
+    render();
+  },
+  env: b => {
+    state.env = b.dataset.env; LS.set('c:env', state.env);
+    if (state.env === 'aluno' && state.me) setCtx(state.me.id);
+    const def = state.env === 'personal' ? 'alunos' : 'treino';
+    if (location.hash !== '#' + def) location.hash = def; else { readHash(); render(); }
+  },
+  'sheet-close': () => { avForm = null; closeSheet(); },
+  refresh: () => { loadAlunos(false); },
+  'go-alunos': () => { location.hash = 'alunos'; },
+  'open-aluno': b => {
+    state.alunoSel = b.dataset.id; state.alunoTab = b.dataset.t || 'resumo';
+    if (b.dataset.s) state.openSess = b.dataset.s;
+    const c = cache(b.dataset.id); if (c.loaded && Date.now() - (c.at || 0) > 60000) pullSafe(b.dataset.id, true);
+    if (location.hash !== '#aluno') location.hash = 'aluno'; else render();
+    window.scrollTo(0, 0);
+  },
+  'aluno-tab': b => { state.alunoTab = b.dataset.t; state.editPlan = null; state.calDay = null; render(); window.scrollTo(0, 0); },
+  'novo-aluno': () => {
+    openSheet(`<form id="na-form" class="stack" novalidate>
+      <div class="row gap between"><h3>Novo aluno</h3><button type="button" class="xbtn" data-action="sheet-close" aria-label="Fechar">✕</button></div>
+      <label class="field" for="na-nome"><span>Nome</span><input class="input" id="na-nome" autocomplete="off" required></label>
+      <label class="field" for="na-obj"><span>Objetivo (opcional)</span><input class="input" id="na-obj" autocomplete="off" placeholder="Ex.: hipertrofia, emagrecimento, reabilitação"></label>
+      <label class="field" for="na-ficha"><span>Começar com a ficha</span><select class="input" id="na-ficha">
+        <option value="padrao">Ficha padrão (Treinos A a D)</option>
+        ${state.alunos.map(a => `<option value="${esc(a.id)}">Copiar de ${esc(a.nome)}</option>`).join('')}
+        ${state.me ? `<option value="${esc(state.me.id)}">Copiar da minha ficha</option>` : ''}
+        <option value="vazia">Em branco</option></select></label>
+      <button type="submit" class="btn primary big block">Cadastrar</button>
+    </form>`);
+  },
+  'edit-aluno': () => {
+    const a = state.alunos.find(x => x.id === state.alunoSel); if (!a) return;
+    openSheet(`<form id="ea-form" class="stack" novalidate>
+      <div class="row gap between"><h3>Dados do aluno</h3><button type="button" class="xbtn" data-action="sheet-close" aria-label="Fechar">✕</button></div>
+      <label class="field" for="ea-nome"><span>Nome</span><input class="input" id="ea-nome" value="${esc(a.nome)}" autocomplete="off"></label>
+      <label class="field" for="ea-obj"><span>Objetivo</span><input class="input" id="ea-obj" value="${esc(a.objetivo || '')}" autocomplete="off"></label>
+      <label class="field" for="ea-obs"><span>Observações (lesões, restrições, preferências)</span><textarea class="input" id="ea-obs" rows="3">${esc(a.observacoes || '')}</textarea></label>
+      <label class="toggle" for="ea-ativo"><input type="checkbox" id="ea-ativo"${a.ativo !== false ? ' checked' : ''}> Aluno ativo</label>
+      <button type="submit" class="btn primary block">Salvar</button>
+      <div class="vsec">
+        ${a.user_id ? `<p class="small muted">A conta do aluno está ligada a este cadastro.</p><button type="button" class="btn" data-action="desvincular">Desligar a conta do aluno</button>` : `<p class="small muted">Convite atual: <b>${esc(a.convite)}</b></p><button type="button" class="btn" data-action="novo-convite">Gerar novo código de convite</button>`}
+        <button type="button" class="btn danger" data-action="del-aluno">Excluir aluno e todos os dados</button>
+      </div>
+    </form>`);
+  },
+  'novo-convite': async () => {
+    const a = state.alunos.find(x => x.id === state.alunoSel); if (!a) return;
+    const code = Array.from({ length: 8 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
+    try { const up = await api.atualizarAluno(a.id, { convite: code }); state.alunos = state.alunos.map(x => x.id === a.id ? up : x); closeSheet(); render(); toast('Novo código gerado. O anterior deixou de valer.'); }
+    catch (e) { toast(errText(e)); }
+  },
+  desvincular: async () => {
+    const a = state.alunos.find(x => x.id === state.alunoSel); if (!a) return;
+    if (!await ask('Desligar a conta?', `A conta de ${a.nome} deixa de acessar a ficha. Os treinos continuam salvos aqui.`, 'Desligar', true)) return;
+    try { const up = await api.atualizarAluno(a.id, { user_id: null }); state.alunos = state.alunos.map(x => x.id === a.id ? up : x); closeSheet(); render(); }
+    catch (e) { toast(errText(e)); }
+  },
+  'del-aluno': async () => {
+    const a = state.alunos.find(x => x.id === state.alunoSel); if (!a) return;
+    if (!await ask(`Excluir ${a.nome}?`, 'A ficha, os treinos, as avaliações (com fotos) e os recados serão apagados para sempre.', 'Excluir tudo', true)) return;
+    try {
+      const fotos = (cache(a.id).avaliacoes || []).flatMap(x => x.fotos || []);
+      if (fotos.length) await api.apagarFotos(fotos).catch(() => {});
+      await api.apagarAluno(a.id);
+      state.alunos = state.alunos.filter(x => x.id !== a.id); LS.set('c:alunos', state.alunos);
+      closeSheet(); location.hash = 'alunos'; toast('Aluno excluído');
+    } catch (e) { toast(errText(e)); }
+  },
+  'copiar-convite': async b => {
+    const a = state.alunos.find(x => x.id === b.dataset.id); if (!a) return;
+    try { await navigator.clipboard.writeText(conviteMsg(a)); toast('Mensagem copiada. Cole no WhatsApp do aluno.'); }
+    catch (e) { toast('Não consegui copiar. Use o botão do WhatsApp.'); }
+  },
+  'del-msg': async b => {
+    if (!await ask('Apagar mensagem?', 'Ela some para você e para o outro lado.', 'Apagar', true)) return;
+    const c = cache(b.dataset.aluno); c.comentarios = (c.comentarios || []).filter(m => m.id !== b.dataset.id);
+    if (state.resumo) state.resumo.comentarios = (state.resumo.comentarios || []).filter(m => m.id !== b.dataset.id);
+    saveCtxCache();
+    enqueue({ k: 'comentarios:' + b.dataset.id, t: 'comentarios', op: 'delete', id: b.dataset.id, aluno: b.dataset.aluno });
+    render();
+  },
+  'av-new': () => avFormOpen(null),
+  'av-edit': b => avFormOpen(b.dataset.id),
+  'av-open': b => openAvaliacao(b.dataset.id),
+  'av-del': async b => {
+    const c = cache(state.ctx), av = (c.avaliacoes || []).find(x => x.id === b.dataset.id); if (!av) return;
+    if (!await ask('Excluir avaliação?', `A avaliação de ${fmtDMY(av.data)} e as fotos dela serão apagadas.`, 'Excluir', true)) return;
+    try {
+      if ((av.fotos || []).length) await api.apagarFotos(av.fotos).catch(() => {});
+      await api.apagarAvaliacao(av.id);
+      c.avaliacoes = c.avaliacoes.filter(x => x.id !== av.id); closeSheet(); render(); toast('Avaliação excluída');
+    } catch (e) { toast(errText(e)); }
+  },
+  'criar-meu': async () => {
+    try {
+      const a = await api.criarAluno({ personal_id: uid(), user_id: uid(), nome: (state.profile && state.profile.nome) || 'Eu' });
+      state.me = a; LS.set('c:me', a);
+      const leg = legacyData();
+      const c = cache(a.id); Object.assign(c, { plan: normalizePlan(leg.plan || defaultPlan()), sessions: [], corpo: [], avaliacoes: [], comentarios: [], loaded: true });
+      setCtx(a.id); await persistPlan();
+      toast('Pronto! Agora você registra os seus treinos aqui.');
+      render();
+    } catch (e) { toast('Não consegui criar: ' + errText(e)); }
+  },
+  migrar: async () => {
+    const leg = legacyData(); if (!state.me) return;
+    const have = new Set(state.sessions.map(s => s.id));
+    let n = 0;
+    for (const s of leg.sessions) {
+      if (!s || !s.treino || !/^\d{4}-\d{2}-\d{2}$/.test(s.data || '')) continue;
+      const sess = Object.assign({}, s, { id: SAFE_ID.test(s.id || '') ? s.id : newId('s') });
+      if (have.has(sess.id)) continue;
+      upsertLocal(sess);
+      enqueue({ k: 'sessoes:' + sess.id, t: 'sessoes', op: 'upsert', id: sess.id, aluno: state.ctx, row: sessRow(sess, state.ctx), local: sess });
+      n++;
+    }
+    for (const x of leg.corpo) { if (x && x.data && typeof x.kg === 'number' && !state.corpo.some(y => y.data === x.data)) state.corpo.push({ id: SAFE_ID.test(x.id || '') ? x.id : newId('p'), data: x.data, kg: x.kg }); }
+    await persistCorpo();
+    if (canEditPlan() && leg.plan && !(cache(state.ctx).planAt)) { state.plan = normalizePlan(leg.plan); await persistPlan(); }
+    LS.set('legado:migrado', true);
+    toast(n ? `${n} treinos enviados para a sua conta` : 'Tudo certo: seus dados já estavam na conta');
+    render();
+  },
+  'migrar-nao': () => { if (state.me) LS.set('legado:adiado:' + state.me.id, true); render(); },
+  'salvar-nome': async () => {
+    const nome = ($('#pf-nome').value || '').trim(); if (!nome) return;
+    try { await api.updateNome(uid(), nome); state.profile = Object.assign({}, state.profile, { nome }); LS.set('c:profile', state.profile); toast('Nome salvo'); }
+    catch (e) { toast(errText(e)); }
+  }
+};
+
+async function authSubmit() {
+  const signup = (state.loginMode || (LS.get('convite', null) ? 'signup' : 'signin')) === 'signup';
+  const email = ($('#au-email').value || '').trim(), senha = $('#au-senha').value || '';
+  if (!email || !/\S+@\S+\.\S+/.test(email)) { toast('Digite um e-mail válido.'); $('#au-email').focus(); return; }
+  if (senha.length < 6) { toast('A senha precisa ter pelo menos 6 caracteres.'); $('#au-senha').focus(); return; }
+  const btn = $('#au-go'); btn.disabled = true; btn.textContent = 'Aguarde…';
+  try {
+    if (signup) {
+      const nome = ($('#au-nome').value || '').trim();
+      if (!nome) { toast('Digite seu nome.'); btn.disabled = false; btn.textContent = 'Criar conta'; $('#au-nome').focus(); return; }
+      const conv = ($('#au-conv').value || '').trim().toUpperCase();
+      if (conv) LS.set('convite', conv);
+      const r = await api.signUp(email, senha, nome);
+      if (!r || !r.session) {
+        state.loginMode = 'signin'; render();
+        openSheet(`<h3>Confirme seu e-mail</h3><p>Enviamos um link de confirmação para <b>${esc(email)}</b>. Abra o e-mail, toque no link e depois volte aqui para entrar.</p><button type="button" class="btn primary" data-action="sheet-close">Entendi</button>`);
+        return;
+      }
+      await afterLogin(r.session.user);
+    } else {
+      const r = await api.signIn(email, senha);
+      await afterLogin(r.user || (r.session && r.session.user));
+    }
+  } catch (e) {
+    toast(errText(e));
+    const b2 = $('#au-go'); if (b2) { b2.disabled = false; b2.textContent = signup ? 'Criar conta' : 'Entrar'; }
+  }
+}
+document.addEventListener('submit', async e => {
+  const f = e.target;
+  if (!(f instanceof HTMLFormElement)) return;
+  e.preventDefault();
+  if (f.id === 'auth-form') return authSubmit();
+  if (f.id === 'conv-form') {
+    const code = ($('#cv-code').value || '').trim().toUpperCase();
+    if (!code) { toast('Digite o código.'); return; }
+    try { const me = await api.usarConvite(code); state.me = me; LS.set('c:me', me); LS.set('convite', null); setCtx(me.id); readHash(); render(); pullSafe(me.id, true); toast('Pronto! Sua conta está ligada à sua ficha.'); }
+    catch (err) { toast(errText(err)); }
+    return;
+  }
+  if (f.id === 'pw-form') {
+    const pw = $('#pw-new').value || '';
+    if (pw.length < 6) { toast('A senha precisa ter pelo menos 6 caracteres.'); return; }
+    try { await api.updatePassword(pw); closeSheet(); toast('Senha alterada'); } catch (err) { toast(errText(err)); }
+    return;
+  }
+  if (f.id === 'na-form') return novoAlunoSubmit();
+  if (f.id === 'ea-form') return editAlunoSubmit();
+  if (f.id === 'av-form') return avSave();
+  if (f.classList.contains('msgform')) {
+    const inp = f.querySelector('input[name="t"]'), texto = (inp.value || '').trim();
+    if (!texto) return;
+    inp.value = '';
+    sendComment(f.dataset.aluno, f.dataset.s || null, texto);
+    const again = document.getElementById(inp.id); if (again) again.focus();
+  }
+});
+document.addEventListener('change', async e => {
+  const el = e.target;
+  if (el.id === 'av-cmp') { closeSheet(); openAvaliacao(el.dataset.id, el.value || null); return; }
+  if (el.dataset && el.dataset.slot && avForm && el.files && el.files[0]) {
+    const slot = el.dataset.slot, file = el.files[0]; el.value = '';
+    try {
+      const blob = await compressImage(file);
+      if (!blob) throw new Error('imagem');
+      avForm.novas[slot] = blob;
+      const box = document.getElementById('ph-' + slot);
+      const img = box && (box.querySelector('img') || box.insertBefore(document.createElement('img'), box.firstChild));
+      if (img) { img.src = URL.createObjectURL(blob); img.alt = ''; }
+      const sm = box && box.querySelector('small'); if (sm) sm.remove();
+    } catch (err) { toast('Não consegui abrir essa foto. Tente outra.'); }
+  }
+});
+document.addEventListener('input', e => { if (e.target.id === 'busca') { state.busca = e.target.value; renderView(); } });
+window.addEventListener('online', () => { if (isCloud()) { state.syncErr = ''; flush(); } renderChrome(); });
+window.addEventListener('offline', () => renderChrome());
+document.addEventListener('visibilitychange', () => {
+  if (!isCloud() || document.visibilityState !== 'visible' || !state.user) return;
+  flush();
+  if (state.me && state.ctx === state.me.id) pullSafe(state.me.id, true);
+  if (state.role === 'personal' && state.env === 'personal') { loadAlunos(true); if (state.view === 'aluno' && state.alunoSel) pullSafe(state.alunoSel, true); }
+});
+setInterval(() => { if (isCloud() && state.user && document.visibilityState === 'visible') { flush(); if (state.role === 'personal' && state.env === 'personal' && state.view !== 'aluno') loadAlunos(true); } }, 120000);
+
+
 /* ---------- Ações ---------- */
 function go(v) { if (location.hash !== '#' + v) location.hash = v; else { state.view = v; render(); } }
 function stepFor(e) { return e.unidade === 's' ? 5 : e.unidade === 'reps' ? 1 : (+state.settings.step || 2); }
@@ -1570,7 +2588,7 @@ const actions = {
     primeAudio();
     const itens = {};
     for (const e of t.exercicios) { const l = lastOf(e.id); if (l && l.cargas && nSeries(e) > 1) itens[e.id] = { carga: '', feitas: 0, obs: '', porSerie: true, cargas: [] }; }
-    state.draft = { sid: null, treino: t.id, data: todayISO(), itens, nota: '', criadoEm: Date.now(), inicio: Date.now() };
+    state.draft = { sid: null, aluno: state.ctx, treino: t.id, data: todayISO(), itens, nota: '', criadoEm: Date.now(), inicio: Date.now() };
     LS.set('draft', state.draft); render(); window.scrollTo(0, 0);
   },
   set: b => {
@@ -1720,7 +2738,7 @@ const actions = {
     if (state.draft && !await ask('Trocar o treino em andamento?', 'Há um treino em andamento que ainda não foi salvo. Ele será descartado.', 'Descartar e editar', true)) return;
     const itens = {};
     for (const [id, it] of Object.entries(s.itens || {})) itens[id] = { carga: it.carga == null ? '' : nfIn.format(it.carga), feitas: it.feitas || 0, obs: it.obs || '', porSerie: Array.isArray(it.cargas), cargas: Array.isArray(it.cargas) ? it.cargas.map(v => v == null ? '' : nfIn.format(v)) : [] };
-    state.draft = { sid: s.id, treino: s.treino, data: s.data, itens, nota: s.nota || '', criadoEm: s.criadoEm };
+    state.draft = { sid: s.id, aluno: state.ctx, treino: s.treino, data: s.data, itens, nota: s.nota || '', criadoEm: s.criadoEm };
     LS.set('draft', state.draft); go('treino'); window.scrollTo(0, 0);
   },
   'del-sess': async b => {
@@ -1776,6 +2794,15 @@ const actions = {
   'timer-add': () => { timer.end = Math.max(timer.end, Date.now()) + 15000; timer.fired = false; $('#timer').classList.remove('over'); $('#timer-l').textContent = 'Descanso'; clearTimeout(timer.h); clearInterval(timer.h); tick(); timer.h = setInterval(tick, 250); syncRestNotice(); },
   'timer-stop': () => stopTimer()
 };
+Object.assign(actions, cloudActions, {
+  'copiar-ficha': async () => {
+    const src = $('#cp-src') && $('#cp-src').value; if (!src) return;
+    if (!await ask('Substituir a ficha?', `A ficha atual de ${alunoNome(state.ctx)} será trocada pela ficha de ${alunoNome(src)}. O histórico de treinos continua.`, 'Substituir', true)) return;
+    try { if (!cache(src).loaded) await pull(src); } catch (e) { toast('Não consegui carregar: ' + errText(e)); return; }
+    state.plan = normalizePlan(clone(cache(src).plan || defaultPlan())); state.editPlan = null;
+    await persistPlan(); toast('Ficha copiada');
+  }
+});
 function bump(b, dir) {
   const fx = findEx(b.dataset.ex); if (!fx) return;
   const it = draftItem(fx.e.id);
@@ -1885,19 +2912,36 @@ document.addEventListener('change', async e => {
   }
 });
 
-function readHash() { const h = location.hash.replace('#', ''); state.view = VIEWS[h] ? h : 'treino'; }
+function readHash() {
+  const h = location.hash.replace('#', '');
+  const A = ['treino', 'historico', 'evolucao', 'ficha'], P = ['alunos', 'aluno', 'recados', 'conta'];
+  if (!isCloud()) { state.view = A.includes(h) ? h : 'treino'; return; }
+  if (grabConvite() && state.user && state.role !== 'personal' && !state.me) { state.view = 'convite'; return; }
+  if (!state.user) { state.view = state.view === 'carregando' ? 'carregando' : 'login'; return; }
+  if (state.role !== 'personal' && !state.me) { state.view = 'convite'; return; }
+  if (state.role === 'personal') { if (P.includes(h)) state.env = 'personal'; else if (A.includes(h)) state.env = 'aluno'; }
+  else state.env = 'aluno';
+  const allowed = state.env === 'personal' ? P : A;
+  state.view = allowed.includes(h) ? h : allowed[0];
+  if (state.view === 'aluno' && !state.alunos.some(a => a.id === state.alunoSel)) state.view = 'alunos';
+  if (state.env === 'aluno' && state.me && state.ctx !== state.me.id) setCtx(state.me.id);
+  if (state.view !== 'aluno') state.editPlan = state.env === 'aluno' ? state.editPlan : null;
+}
 window.addEventListener('hashchange', () => { readHash(); render(); window.scrollTo(0, 0); });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
 }
 
-readHash();
-if (state.draft && !location.hash) state.view = 'treino';
 ntfyCancel();
 VDB.keys().then(ks => { if (ks && ks.length) { state.vids = new Set(ks); render(); } }).catch(() => {});
-render();
-initStore();
+if (CLOUD_ON) { bootCloud(); initStore(); }
+else {
+  readHash();
+  if (state.draft && !location.hash) state.view = 'treino';
+  render();
+  initStore();
+}
 })();
 </script>
 </body>

@@ -1,10 +1,12 @@
 /* ÁXIS: funciona sem internet depois da primeira abertura */
-const VERSION = 'axis-v7';
+const VERSION = 'axis-v8';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './vendor/jspdf.umd.min.js',
+  './vendor/supabase-2.118.0.js',
+  './config.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
