@@ -3,7 +3,7 @@
 -- que envia a notificação para o celular. Pode rodar de novo sem problema.
 
 create extension if not exists pg_cron;
-create extension if not exists pg_net;
+create extension if not exists pg_net with schema extensions;
 
 -- ---------------------------------------------------------------------------
 -- Inscrições de notificação (uma por celular)
