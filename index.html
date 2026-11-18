@@ -1766,7 +1766,7 @@ const api = window.AXIS_TEST_API || {
   remove: async (t, id) => must(await sb.from(t).delete().eq('id', id)),
   salvarAvaliacao: async row => must(await sb.from('avaliacoes').upsert(row).select().single()),
   apagarAvaliacao: async id => must(await sb.from('avaliacoes').delete().eq('id', id)),
-  enviarFoto: async (path, blob) => must(await sb.storage.from('avaliacoes').upload(path, blob, { contentType: 'image/jpeg', upsert: true })),
+  enviarFoto: async (path, blob) => must(await sb.storage.from('avaliacoes').upload(path, blob, { contentType: 'image/jpeg', upsert: false })),
   urlsFotos: async paths => must(await sb.storage.from('avaliacoes').createSignedUrls(paths, 3600)),
   apagarFotos: async paths => must(await sb.storage.from('avaliacoes').remove(paths))
 };
