@@ -1,5 +1,5 @@
 /* ÁXIS: funciona sem internet depois da primeira abertura */
-const VERSION = 'axis-v9';
+const VERSION = 'axis-v10';
 const ASSETS = [
   './',
   './index.html',

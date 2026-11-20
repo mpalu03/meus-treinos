@@ -394,6 +394,15 @@ nav.tabs a { font-weight: 500; letter-spacing: .04em; border-radius: 999px; }
 .photo a { position: absolute; inset: 0; }
 .photo span { position: absolute; left: 8px; bottom: 8px; background: rgba(0, 0, 0, .55); color: #fff; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; }
 .photo label { position: absolute; inset: 0; cursor: pointer; }
+.pill.off { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+.pcard { padding: 0; overflow: hidden; }
+.pcard > .acard { border: 0; border-radius: 0; box-shadow: none; }
+.pcard > .acard small { display: block; }
+.pcard .pbody { border-top: 1px solid var(--line); padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.arow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.arow:last-child { border-bottom: 0; }
+.arow b { display: block; font-weight: 500; }
+.arow small { color: var(--muted); font-size: 12.5px; display: block; }
 nav.tabs .badge.n { width: auto; min-width: 17px; height: 17px; padding: 0 4px; font-size: 10px; color: #fff; display: inline-flex; align-items: center; justify-content: center; right: calc(50% - 24px); top: 2px; }
 </style>
 </head>
@@ -1068,19 +1077,21 @@ function viewFicha() {
   return html;
 }
 
-const VIEWS = { treino: viewTreino, historico: viewHistorico, evolucao: viewEvolucao, ficha: viewFicha, alunos: viewAlunos, aluno: viewAluno, recados: viewRecados, conta: viewConta, login: viewLogin, convite: viewConvite, carregando: viewCarregando };
+const VIEWS = { treino: viewTreino, historico: viewHistorico, evolucao: viewEvolucao, ficha: viewFicha, alunos: viewAlunos, aluno: viewAluno, recados: viewRecados, conta: viewConta, login: viewLogin, convite: viewConvite, carregando: viewCarregando, admin: viewAdmin };
 const ICONS = {
   treino: '<path d="M6.5 6v12M3.5 9v6M17.5 6v12M20.5 9v6M6.5 12h11"/>',
   historico: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
   evolucao: '<path d="M3.5 20h17"/><path d="M5 16l4.5-5 4 3 6-7.5"/>',
   ficha: '<rect x="5" y="4.5" width="14" height="16.5" rx="2"/><path d="M9 3h6v3.5H9zM8.5 11h7M8.5 15h7"/>',
   perfil: '<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20.5c1.3-3.6 4.2-5.4 7.5-5.4s6.2 1.8 7.5 5.4"/>',
+  admin: '<path d="M12 3.5l7 3v5c0 4.3-2.9 7.8-7 9-4.1-1.2-7-4.7-7-9v-5z"/><path d="M9 12l2 2 4-4"/>',
   alunos: '<circle cx="9" cy="8.5" r="3.4"/><path d="M2.8 19.5c1-3.1 3.4-4.7 6.2-4.7s5.2 1.6 6.2 4.7"/><path d="M15.5 5.6a3.2 3.2 0 0 1 0 6.2M17.6 14.9c1.9.6 3.2 2.1 3.8 4.4"/>',
   recados: '<path d="M4 5.5h16v10.5H9.5L5 19.5V16H4z"/><path d="M8 9.5h8M8 12.5h5"/>',
   conta: '<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20.5c1.3-3.6 4.2-5.4 7.5-5.4s6.2 1.8 7.5 5.4"/>'
 };
 function navTabs() {
   if (isCloud() && (!state.user || ['login', 'convite', 'carregando'].includes(state.view))) return [];
+  if (isCloud() && state.role === 'admin') return [['admin', 'Personais'], ['conta', 'Conta']];
   if (isCloud() && state.env === 'personal') return [['alunos', 'Alunos'], ['recados', 'Recados'], ['conta', 'Conta']];
   return [['treino', 'Treino'], ['historico', 'Histórico'], ['evolucao', 'Evolução'], ['ficha', isCloud() ? 'Perfil' : 'Ficha']];
 }
@@ -1848,6 +1859,10 @@ const api = window.AXIS_TEST_API || {
   enviarFoto: async (path, blob) => must(await sb.storage.from('avaliacoes').upload(path, blob, { contentType: 'image/jpeg', upsert: false })),
   urlsFotos: async paths => must(await sb.storage.from('avaliacoes').createSignedUrls(paths, 3600)),
   apagarFotos: async paths => must(await sb.storage.from('avaliacoes').remove(paths)),
+  adminPainel: async () => must(await sb.rpc('admin_painel')),
+  adminAddPersonal: async (email, nome) => must(await sb.rpc('admin_add_personal', { p_email: email, p_nome: nome })),
+  adminStatusPersonal: async (email, ativo) => must(await sb.rpc('admin_status_personal', { p_email: email, p_ativo: ativo })),
+  adminRemoverConvite: async email => must(await sb.rpc('admin_remover_convite', { p_email: email })),
   registrarPush: async (endpoint, p256dh, auth) => must(await sb.rpc('registrar_push', { p_endpoint: endpoint, p_p256dh: p256dh, p_auth: auth })),
   removerPush: async endpoint => must(await sb.from('push_inscricoes').delete().eq('endpoint', endpoint)),
   agendarAviso: async row => must(await sb.from('avisos').insert(row)),
@@ -2052,7 +2067,7 @@ async function bootCloud() {
   await afterLogin(session.user);
 }
 function resetCloud() {
-  Object.assign(state, { user: null, profile: null, role: null, me: null, alunos: [], alunoSel: null, cache: {}, resumo: { sessoes: [], comentarios: [], metas: {} }, ctx: null, env: 'aluno', draft: null });
+  Object.assign(state, { admin: null, admOpen: null, busca: '', user: null, profile: null, role: null, me: null, alunos: [], alunoSel: null, cache: {}, resumo: { sessoes: [], comentarios: [], metas: {} }, ctx: null, env: 'aluno', draft: null });
   state.view = 'login';
 }
 async function afterLogin(user) {
@@ -2061,7 +2076,13 @@ async function afterLogin(user) {
   let prof = cachedProf && cachedProf.id === user.id ? cachedProf : null;
   try { prof = (await api.profile(user.id)) || prof; if (prof) LS.set('c:profile', prof); } catch (e) { /* offline */ }
   state.profile = prof;
-  state.role = prof && prof.papel === 'personal' ? 'personal' : 'aluno';
+  state.role = prof && (prof.papel === 'personal' || prof.papel === 'admin') ? prof.papel : 'aluno';
+  if (state.role === 'admin') {
+    state.me = null; state.env = 'admin'; state.draft = null;
+    state.admin = LS.get('c:admin', null);
+    readHash(); render(); loadAdmin(true);
+    return;
+  }
   const cachedMe = LS.get('c:me', null);
   let me = cachedMe && cachedMe.user_id === user.id ? cachedMe : null;
   try { me = await api.meuCadastro(user.id); LS.set('c:me', me); } catch (e) { /* offline: usa o salvo */ }
@@ -2231,12 +2252,13 @@ function contaCard() {
   const pend = outbox().length;
   return `<div class="card stack">
     <label class="field" for="pf-nome"><span>Seu nome</span><input class="input" id="pf-nome" value="${esc(p.nome || '')}" autocomplete="name"></label>
-    <p class="small muted">${esc(state.user ? state.user.email : '')} · ${state.role === 'personal' ? 'conta de personal' : 'conta de aluno'}</p>
+    <p class="small muted">${esc(state.user ? state.user.email : '')} · ${state.role === 'admin' ? 'conta de administrador' : state.role === 'personal' ? 'conta de personal' : 'conta de aluno'}</p>
     ${pend ? `<p class="small" style="color:var(--bad)">${pend} ${pend === 1 ? 'alteração ainda não enviada' : 'alterações ainda não enviadas'} (sem internet).</p>` : ''}
     <div class="row gap wrap"><button type="button" class="btn grow" data-action="salvar-nome">Salvar nome</button><button type="button" class="btn danger grow" data-action="logout">Sair da conta</button></div>
   </div>`;
 }
 function viewConta() {
+  if (state.role === 'admin') return viewAdminConta();
   return `<div style="margin-bottom:12px"><div class="kicker" style="color:var(--gold)">Personal</div><h2 class="dtitle">Conta</h2></div>
     ${contaCard()}
     <h3 class="sec">Como convidar um aluno</h3>
@@ -2247,6 +2269,115 @@ function envBar() {
   if (!isCloud() || state.role !== 'personal' || ['login', 'convite', 'carregando'].includes(state.view)) return '';
   return `<div class="envbar" role="group" aria-label="Ambiente"><button type="button" data-action="env" data-env="personal" aria-pressed="${state.env === 'personal'}">Personal</button><button type="button" data-action="env" data-env="aluno" aria-pressed="${state.env === 'aluno'}">Meu treino</button></div>`;
 }
+
+/* ---------- Ambiente do administrador ---------- */
+async function loadAdmin(quiet) {
+  try {
+    state.admin = await api.adminPainel();
+    LS.set('c:admin', state.admin); state.syncErr = '';
+  } catch (e) { state.syncErr = isNetErr(e) ? 'offline' : 'erro'; if (!quiet && !isNetErr(e)) toast('Não consegui carregar o painel: ' + errText(e)); }
+  render();
+}
+const alunosReais = p => (p.alunos || []).filter(a => !a.proprio);
+function relData(iso) {
+  if (!iso) return '';
+  const dd = Math.round((parseISO(todayISO()) - parseISO(String(iso).slice(0, 10))) / 864e5);
+  return dd <= 0 ? 'hoje' : dd === 1 ? 'ontem' : dd < 30 ? `há ${dd} dias` : fmtDMY(String(iso).slice(0, 10));
+}
+function personalConvite(p) {
+  return `Olá, ${String(p.nome || '').split(' ')[0]}! Você foi cadastrado como personal no app ÁXIS. Crie sua conta com o e-mail ${p.email} neste link: ${APP_URL}`;
+}
+const PSTATUS = { ativo: ['Ativo', ''], pendente: ['Aguardando cadastro', ' wait'], bloqueado: ['Bloqueado', ' off'] };
+function adminAlunoRow(a) {
+  const info = [a.objetivo, a.ultimo ? `último treino ${relData(a.ultimo)}` : 'ainda não treinou pelo app', a.semana ? `${a.semana} na semana` : '', a.mes ? `${a.mes} no mês` : '', a.avaliacao ? `avaliação ${relData(a.avaliacao)}` : ''].filter(Boolean).join(' · ');
+  return `<div class="arow"><div class="grow"><b>${esc(a.nome)}</b><small>${esc(info)}</small></div>
+    ${a.proprio ? '<span class="pill">Ficha própria</span>' : !a.ligado ? '<span class="pill wait">Convite pendente</span>' : ''}${a.ativo === false ? '<span class="pill wait">Inativo</span>' : ''}</div>`;
+}
+function viewAdmin() {
+  const d = state.admin;
+  let html = `<div class="row between gap" style="margin-bottom:12px"><div><div class="kicker" style="color:var(--gold)">Administrador</div><h2 class="dtitle">Personais</h2></div><button type="button" class="btn primary" data-action="adm-novo">+ Novo personal</button></div>`;
+  if (!d) return html + `<div class="card empty"><p>${state.syncErr === 'offline' ? 'Sem internet. Conecte para ver o painel.' : 'Carregando o painel…'}</p></div>`;
+  const ps = d.personais || [];
+  if (!ps.length) return html + emptyBlock('Nenhum personal ainda', 'Cadastre o primeiro personal com o nome e o e-mail. Ele cria a conta com esse e-mail e já entra como personal.', 'Cadastrar personal', 'adm-novo');
+  const todos = ps.flatMap(alunosReais);
+  html += `<div class="card" style="margin-bottom:12px"><div class="sumgrid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat"><small>Personais ativos</small><b>${ps.filter(p => p.status === 'ativo').length}</b></div>
+    <div class="stat"><small>Alunos</small><b>${todos.length}</b></div>
+    <div class="stat"><small>Treinaram na semana</small><b>${todos.filter(a => a.semana > 0).length}</b></div></div></div>`;
+  const q = (state.busca || '').trim().toLowerCase();
+  if (ps.length + todos.length > 8) html += `<input class="input" id="busca" placeholder="Buscar personal ou aluno" value="${esc(state.busca || '')}" autocomplete="off" style="margin-bottom:10px">`;
+  const vis = !q ? ps : ps.filter(p => (p.nome + ' ' + p.email).toLowerCase().includes(q) || alunosReais(p).some(a => a.nome.toLowerCase().includes(q)));
+  const card = p => {
+    const al = alunosReais(p), own = (p.alunos || []).find(a => a.proprio);
+    const aberto = state.admOpen === p.email || (q && vis.length === 1);
+    const [st, cls] = PSTATUS[p.status] || PSTATUS.ativo;
+    const resumo = p.status === 'pendente' ? 'Ainda não criou a conta' : (() => { const n = al.filter(a => a.semana > 0).length; return `${al.length} ${al.length === 1 ? 'aluno' : 'alunos'} · ${n} ${n === 1 ? 'treinou' : 'treinaram'} na semana`; })();
+    let body = '';
+    if (aberto) {
+      const lista = q ? al.filter(a => a.nome.toLowerCase().includes(q) || (p.nome + ' ' + p.email).toLowerCase().includes(q)) : al;
+      body = `<div class="pbody">
+        ${p.status !== 'pendente' ? (lista.length ? `<div>${lista.map(adminAlunoRow).join('')}</div>` : `<p class="small muted">${al.length ? 'Nenhum aluno com esse nome.' : 'Nenhum aluno cadastrado ainda.'}</p>`) + (own ? `<div>${adminAlunoRow(own)}</div>` : '') : ''}
+        ${p.status === 'pendente' ? `<p class="small">Envie o convite: ${esc(String(p.nome).split(' ')[0])} cria a conta com <b>${esc(p.email)}</b> e já entra como personal.</p>
+          <a class="btn primary" href="https://wa.me/?text=${encodeURIComponent(personalConvite(p))}" target="_blank" rel="noopener">Enviar pelo WhatsApp</a>
+          <div class="row gap"><button type="button" class="btn sm grow" data-action="adm-copiar" data-email="${esc(p.email)}">Copiar mensagem</button><button type="button" class="btn sm danger grow" data-action="adm-cancelar" data-email="${esc(p.email)}">Cancelar convite</button></div>` : ''}
+        ${p.status === 'ativo' ? `<button type="button" class="btn sm danger" data-action="adm-bloquear" data-email="${esc(p.email)}" style="align-self:flex-start">Bloquear acesso</button>` : ''}
+        ${p.status === 'bloqueado' ? `<p class="small muted">Bloqueado: não vê nem altera os alunos. Os alunos continuam usando o app normalmente.</p><button type="button" class="btn sm primary" data-action="adm-liberar" data-email="${esc(p.email)}" style="align-self:flex-start">Liberar acesso</button>` : ''}
+      </div>`;
+    }
+    return `<div class="card pcard"><button type="button" class="acard" data-action="adm-open" data-email="${esc(p.email)}" aria-expanded="${!!aberto}" style="${tv(avHue(p.nome))}">
+      <span class="av">${initial(p.nome)}</span>
+      <span class="grow"><b>${esc(p.nome)}</b><small>${esc(p.email)}</small><small>${esc(resumo)}</small></span>
+      <span class="pill${cls}">${st}</span></button>${body}</div>`;
+  };
+  html += `<div class="stack">${vis.map(card).join('') || '<p class="muted">Nada encontrado.</p>'}</div>`;
+  html += `<p class="small muted" style="margin-top:10px">Atualizado ${esc(fmtQuando(d.gerado_em))}.</p><button type="button" class="btn ghost block" data-action="refresh" style="margin-top:6px">Atualizar</button>`;
+  return html;
+}
+function viewAdminConta() {
+  return `<div style="margin-bottom:12px"><div class="kicker" style="color:var(--gold)">Administrador</div><h2 class="dtitle">Conta</h2></div>
+    ${contaCard()}
+    <h3 class="sec">Como cadastrar um personal</h3>
+    <div class="card small stack"><p>1. Em <b>Personais</b>, toque em <b>+ Novo personal</b> e informe o nome e o e-mail.</p><p>2. Envie o convite pelo WhatsApp. O personal cria a conta com esse e-mail e já entra como personal.</p><p>3. Se a pessoa já tinha conta no app, ela vira personal na hora (basta abrir o app de novo).</p><p>Bloquear tira o acesso do personal aos alunos, sem apagar nada. Os alunos continuam usando o app.</p></div>`;
+}
+async function adminNovoSubmit() {
+  const nome = ($('#np-nome').value || '').trim(), email = ($('#np-email').value || '').trim().toLowerCase();
+  if (!nome) { toast('Informe o nome'); return; }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast('Informe um e-mail válido'); return; }
+  const btn = $('#np-go'); if (btn) btn.disabled = true;
+  try {
+    const r = await api.adminAddPersonal(email, nome);
+    closeSheet(); state.admOpen = email; state.busca = '';
+    toast(r && r.conta ? `${nome.split(' ')[0]} já tinha conta e agora é personal.` : 'Personal cadastrado. Envie o convite.');
+    await loadAdmin(false);
+  } catch (e) { toast(errText(e)); if (btn) btn.disabled = false; }
+}
+const adminActions = {
+  'adm-open': b => { state.admOpen = state.admOpen === b.dataset.email ? null : b.dataset.email; renderView(); },
+  'adm-novo': () => {
+    openSheet(`<form id="np-form" class="stack" novalidate>
+      <div class="row gap between"><h3>Novo personal</h3><button type="button" class="xbtn" data-action="sheet-close" aria-label="Fechar">✕</button></div>
+      <label class="field" for="np-nome"><span>Nome</span><input class="input" id="np-nome" autocomplete="off" required></label>
+      <label class="field" for="np-email"><span>E-mail</span><input class="input" id="np-email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" required placeholder="O mesmo que ele vai usar para entrar"></label>
+      <p class="small muted">A pessoa cria a conta no app com esse e-mail e já entra como personal. Se já tiver conta, vira personal na hora.</p>
+      <button type="submit" id="np-go" class="btn primary big block">Cadastrar personal</button>
+    </form>`);
+  },
+  'adm-copiar': async b => {
+    const p = ((state.admin || {}).personais || []).find(x => x.email === b.dataset.email); if (!p) return;
+    try { await navigator.clipboard.writeText(personalConvite(p)); toast('Mensagem copiada.'); } catch (e) { toast('Não consegui copiar. Use o botão do WhatsApp.'); }
+  },
+  'adm-cancelar': async b => {
+    if (!await ask('Cancelar o convite?', `${b.dataset.email} não vai mais entrar como personal ao criar a conta.`, 'Cancelar convite', true)) return;
+    try { await api.adminRemoverConvite(b.dataset.email); toast('Convite cancelado'); state.admOpen = null; await loadAdmin(false); } catch (e) { toast(errText(e)); }
+  },
+  'adm-bloquear': async b => {
+    if (!await ask('Bloquear este personal?', 'Ele deixa de ver e alterar os alunos e as fichas. Nada é apagado, e os alunos continuam usando o app normalmente. Você pode liberar de novo quando quiser.', 'Bloquear', true)) return;
+    try { await api.adminStatusPersonal(b.dataset.email, false); toast('Acesso bloqueado'); await loadAdmin(false); } catch (e) { toast(errText(e)); }
+  },
+  'adm-liberar': async b => {
+    try { await api.adminStatusPersonal(b.dataset.email, true); toast('Acesso liberado'); await loadAdmin(false); } catch (e) { toast(errText(e)); }
+  }
+};
 
 /* ---------- Comentários ---------- */
 function thread(alunoId, sessaoId) {
@@ -2459,7 +2590,7 @@ const cloudActions = {
     if (location.hash !== '#' + def) location.hash = def; else { readHash(); render(); }
   },
   'sheet-close': () => { avForm = null; closeSheet(); },
-  refresh: () => { loadAlunos(false); },
+  refresh: () => { if (state.role === 'admin') loadAdmin(false); else loadAlunos(false); },
   'go-alunos': () => { location.hash = 'alunos'; },
   'open-aluno': b => {
     state.alunoSel = b.dataset.id; state.alunoTab = b.dataset.t || 'resumo';
@@ -2630,6 +2761,7 @@ document.addEventListener('submit', async e => {
     return;
   }
   if (f.id === 'na-form') return novoAlunoSubmit();
+  if (f.id === 'np-form') return adminNovoSubmit();
   if (f.id === 'ea-form') return editAlunoSubmit();
   if (f.id === 'av-form') return avSave();
   if (f.classList.contains('msgform')) {
@@ -2664,6 +2796,7 @@ document.addEventListener('visibilitychange', () => {
   flush();
   if (state.me && state.ctx === state.me.id) pullSafe(state.me.id, true);
   if (state.role === 'personal' && state.env === 'personal') { loadAlunos(true); if (state.view === 'aluno' && state.alunoSel) pullSafe(state.alunoSel, true); }
+  if (state.role === 'admin') loadAdmin(true);
 });
 setInterval(() => { if (isCloud() && state.user && document.visibilityState === 'visible') { flush(); if (state.role === 'personal' && state.env === 'personal' && state.view !== 'aluno') loadAlunos(true); } }, 120000);
 
@@ -2886,7 +3019,7 @@ const actions = {
   'timer-add': () => { timer.end = Math.max(timer.end, Date.now()) + 15000; timer.fired = false; $('#timer').classList.remove('over'); $('#timer-l').textContent = 'Descanso'; clearTimeout(timer.h); clearInterval(timer.h); tick(); timer.h = setInterval(tick, 250); syncRestNotice(); avisoAgendar(); },
   'timer-stop': () => stopTimer()
 };
-Object.assign(actions, cloudActions, {
+Object.assign(actions, cloudActions, adminActions, {
   'push-ativar': async () => {
     try {
       await pushAtivar(false);
@@ -3025,8 +3158,9 @@ function readHash() {
   const h = location.hash.replace('#', '');
   const A = ['treino', 'historico', 'evolucao', 'ficha'], P = ['alunos', 'aluno', 'recados', 'conta'];
   if (!isCloud()) { state.view = A.includes(h) ? h : 'treino'; return; }
-  if (grabConvite() && state.user && state.role !== 'personal' && !state.me) { state.view = 'convite'; return; }
+  if (grabConvite() && state.user && state.role === 'aluno' && !state.me) { state.view = 'convite'; return; }
   if (!state.user) { state.view = state.view === 'carregando' ? 'carregando' : 'login'; return; }
+  if (state.role === 'admin') { state.env = 'admin'; state.view = ['admin', 'conta'].includes(h) ? h : 'admin'; return; }
   if (state.role !== 'personal' && !state.me) { state.view = 'convite'; return; }
   if (state.role === 'personal') { if (P.includes(h)) state.env = 'personal'; else if (A.includes(h)) state.env = 'aluno'; }
   else state.env = 'aluno';

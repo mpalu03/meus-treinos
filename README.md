@@ -18,7 +18,8 @@ Depois da primeira abertura o app funciona sem internet.
 
 Login e sincronização usam o [Supabase](https://supabase.com) (projeto `qlksntoamjutmycrqidf`). O app funciona sem internet: o que for registrado offline fica numa fila e é enviado quando a conexão volta.
 
-- A **primeira conta criada vira personal**. Outros personais podem ser liberados na tabela `personais` (e-mail).
+- **Administrador (login mestre):** conta sem treinos que vê todos os personais e os alunos de cada um, cadastra novos personais e bloqueia ou libera o acesso deles. Quem é administrador fica na tabela `admins` (só por SQL).
+- **Personal:** o administrador cadastra o nome e o e-mail; a pessoa cria a conta com esse e-mail e já entra como personal (se já tinha conta, vira personal na hora). Personal bloqueado perde o acesso aos alunos, sem apagar nada.
 - O personal cadastra o aluno e envia o convite (link ou código). Ao criar a conta pelo link, a conta do aluno já fica ligada à ficha.
 - Quem pode ver e alterar o quê é garantido pelas regras do banco (Row Level Security), em `supabase/schema.sql`. O aluno só vê os próprios dados; só o personal dele altera a ficha e as avaliações.
 - `config.js` tem só a URL e a chave **publicável** do projeto, feitas para ficar no app. A chave secreta (service_role) nunca entra aqui.
@@ -38,6 +39,8 @@ Se o app estiver na tela perto do fim, o aviso é cancelado e quem toca é o ala
 - A chave privada de envio (VAPID) foi gerada dentro do Supabase e fica no Vault (`axis_vapid`). No app e na função vai só a chave pública.
 - Arquivos: `supabase/avisos.sql` (tabelas, regras e jobs) e `supabase/functions/descanso/` (envio).
 
+Os arquivos SQL rodam nesta ordem: `schema.sql`, `avisos.sql`, `admin.sql`.
+
 Configuração no painel do Supabase: **Authentication → URL Configuration → Site URL** = `https://mpalu03.github.io/meus-treinos/`.
 
 ## Estrutura
@@ -50,6 +53,7 @@ Configuração no painel do Supabase: **Authentication → URL Configuration →
 | `config.js` | Endereço e chave publicável do Supabase |
 | `supabase/schema.sql` | Tabelas, regras de acesso (RLS) e funções do banco |
 | `supabase/avisos.sql` | Notificação de fim do descanso: inscrições, avisos e jobs |
+| `supabase/admin.sql` | Conta de administrador, cadastro e bloqueio de personais |
 | `supabase/functions/descanso/` | Função que envia as notificações (Web Push, sem dependências) |
 | `vendor/supabase-2.118.0.js` | supabase-js 2.118.0 (login e banco) |
 | `vendor/jspdf.umd.min.js` | jsPDF 2.5.1, gera os PDFs de evolução |
