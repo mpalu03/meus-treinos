@@ -33,6 +33,8 @@ Com o app fechado ou o celular bloqueado, o celular pausa o app e o cronômetro 
 2. A cada 2 segundos, um job do banco (`pg_cron`) procura avisos vencidos e chama a função `descanso` (`pg_net`).
 3. A função envia a notificação (Web Push) para o celular que agendou.
 
+As mensagens vão no formato Declarative Web Push (iOS 18.4+): o próprio sistema mostra a notificação mesmo se o service worker não rodar, e o service worker confirma o recebimento no log da função. Ao sair do app no meio do descanso, chega também uma notificação silenciosa com a hora em que ele acaba.
+
 Se o app estiver na tela perto do fim, o aviso é cancelado e quem toca é o alarme do próprio app. Ao sair do app durante o descanso, o aviso é reenviado por `sendBeacon`, caso ainda não exista.
 
 - No iPhone, precisa do iOS 16.4 ou mais novo e do app aberto pelo ícone da tela inicial.

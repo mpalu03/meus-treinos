@@ -5,6 +5,7 @@ import { chaveConfere, enviar, type ChaveVapid, type Inscricao } from './webpush
 // Chave pública de envio (a privada fica só no Vault do banco e chega junto com cada lote)
 const PUB = { x: '16-ZdyoTtiNuwoIW-Yjow6JlBtkBztmHChxPp7pty5g', y: '3ci2kZwy5VzuMAVGFSns1v4eD_VkZwwGK5_J886MP-A' };
 const CONTATO = 'https://mpalu03.github.io/meus-treinos/';
+const APP = CONTATO;
 const ORIGEM = 'https://mpalu03.github.io';
 const CHAVE_APP = 'sb_publishable_VgJ5ctbzboJu8qXTYZnWCQ_8ZvKqVIC';
 const SERVICOS = /^https:\/\/(fcm\.googleapis\.com|android\.googleapis\.com|updates\.push\.services\.mozilla\.com|push\.services\.mozilla\.com|web\.push\.apple\.com|[a-z0-9-]+\.notify\.windows\.com)\//;
@@ -29,8 +30,21 @@ async function disparar(b: { chave?: ChaveVapid; avisos?: Aviso[] }) {
   await Promise.all(avisos.flatMap(a => (Array.isArray(a.subs) ? a.subs.slice(0, 10) : []).map(async s => {
     if (!s || typeof s.endpoint !== 'string' || !SERVICOS.test(s.endpoint)) { falhas++; return; }
     try {
-      const st = await enviar(s, { titulo: a.titulo, corpo: a.corpo, tag: a.tag, url: './#treino' }, chave, CONTATO, {
-        ttl: a.tag === 'descanso' ? 90 : 300, topic: a.tag, urgencia: 'high',
+      // Formato "Declarative Web Push" (iOS 18.4+): o próprio sistema mostra a notificação,
+      // mesmo se o service worker não rodar. Os campos de cima servem para o service worker de versões antigas.
+      const info = a.tag === 'descanso-info';
+      const dados = {
+        web_push: 8030,
+        notification: {
+          title: a.titulo, body: a.corpo, navigate: APP + '#treino', lang: 'pt-BR', dir: 'ltr',
+          tag: a.tag, silent: info, data: { id: a.id, tag: a.tag },
+          // mutable: o service worker também recebe (confirma o recebimento); se ele falhar, o sistema mostra esta mesma
+          mutable: true,
+        },
+        titulo: a.titulo, corpo: a.corpo, tag: a.tag, id: a.id, url: './#treino',
+      };
+      const st = await enviar(s, dados, chave, CONTATO, {
+        ttl: info ? 60 : a.tag === 'descanso' ? 90 : 300, topic: a.tag, urgencia: 'high',
       });
       if (st >= 200 && st < 300) enviados++;
       else { falhas++; if (st === 404 || st === 410) gone.push(s.endpoint); else console.log('push', st, new URL(s.endpoint).host); }
@@ -62,6 +76,16 @@ async function agendar(b: { token?: string; aviso?: Record<string, unknown> }) {
   return json({ ok: r.ok }, r.ok ? 200 : r.status);
 }
 
+// Confirmação do celular (service worker) e diagnóstico do app: só registra no log da função.
+function registrar(b: Record<string, unknown>) {
+  const limpo: Record<string, string> = {};
+  for (const k of ['id', 'tag', 'ok', 'erro', 'v', 'sw', 'ua', 'standalone', 'perm', 'decl']) {
+    if (b[k] !== undefined) limpo[k] = String(b[k]).slice(0, k === 'ua' ? 200 : 120);
+  }
+  console.log(String(b.acao), JSON.stringify(limpo));
+  return new Response(null, { status: 204, headers: cors });
+}
+
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
   if (req.method !== 'POST') return json({ ok: false }, 405);
@@ -69,5 +93,6 @@ Deno.serve(async req => {
   try { b = JSON.parse(await req.text()); } catch { return json({ ok: false }, 400); }
   if (b.acao === 'disparar') return disparar(b);
   if (b.acao === 'agendar') return agendar(b);
+  if (b.acao === 'recebido' || b.acao === 'diag') return registrar(b);
   return json({ ok: false }, 400);
 });

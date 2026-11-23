@@ -1,5 +1,9 @@
 /* ÁXIS: funciona sem internet depois da primeira abertura */
-const VERSION = 'axis-v10';
+const VERSION = 'axis-v11';
+// Endereço da função de avisos (para o celular confirmar que recebeu a notificação)
+try { importScripts('./config.js'); } catch (e) { /* sem nuvem */ }
+const CFG = self.AXIS_CONFIG || {};
+const FN = CFG.supabaseUrl ? CFG.supabaseUrl + '/functions/v1/descanso' : '';
 const ASSETS = [
   './',
   './index.html',
@@ -65,8 +69,10 @@ self.addEventListener('fetch', event => {
 let restGen = 0;
 const ICON = './icons/icon-192.png';
 async function closeTag(tag) {
-  const list = await self.registration.getNotifications({ tag });
-  list.forEach(n => n.close());
+  try {
+    const list = await self.registration.getNotifications({ tag });
+    list.forEach(n => n.close());
+  } catch (e) { /* sem suporte: segue */ }
 }
 async function appVisible() {
   const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
@@ -94,17 +100,42 @@ self.addEventListener('message', event => {
       timestamp: d.end || Date.now(), data: { url: './#treino' }
     }));
   } else if (d.type === 'rest-fg') {
-    event.waitUntil(closeTag('rest-live').then(() => closeTag('rest-end')).then(() => closeTag('descanso')));
+    event.waitUntil(closeTag('rest-live').then(() => closeTag('rest-end')).then(() => closeTag('descanso')).then(() => closeTag('descanso-info')));
+  } else if (d.type === 'versao') {
+    const port = event.ports && event.ports[0];
+    if (port) port.postMessage(VERSION);
   }
 });
-/* Notificação enviada pelo servidor (fim do descanso, teste) */
+/* Notificação enviada pelo servidor (fim do descanso, teste).
+   No iOS 18.4+ a mensagem já vem no formato "declarativo" e o sistema mostra sozinho;
+   aqui o service worker mostra a mesma notificação (e cobre as versões antigas). */
 self.addEventListener('push', event => {
   let d = {};
   try { d = event.data ? event.data.json() : {}; } catch (e) { d = { corpo: event.data ? event.data.text() : '' }; }
-  event.waitUntil(closeTag('rest-live').then(() => self.registration.showNotification(d.titulo || 'ÁXIS', {
-    body: d.corpo || '', tag: d.tag || 'descanso', renotify: true,
-    vibrate: [300, 120, 300, 120, 500], icon: ICON, badge: ICON, data: { url: d.url || './#treino' }
-  })));
+  const n = d.notification || {};
+  const nd = n.data || {};
+  const tag = n.tag || d.tag || 'descanso';
+  const silent = n.silent === true;
+  const opts = {
+    body: n.body || d.corpo || '', tag, silent, icon: ICON, badge: ICON,
+    data: { url: d.url || './#treino', id: nd.id || d.id || null }
+  };
+  if (!silent) { opts.renotify = true; opts.vibrate = [300, 120, 300, 120, 500]; }
+  const titulo = n.title || d.titulo || 'ÁXIS';
+  event.waitUntil((async () => {
+    let ok = true, erro = '';
+    try { await self.registration.showNotification(titulo, opts); }
+    catch (e) {
+      ok = false; erro = String(e && e.message || e);
+      try { await self.registration.showNotification(titulo, { body: opts.body, tag }); ok = true; } catch (e2) { erro += ' | ' + String(e2 && e2.message || e2); }
+    }
+    if (tag !== 'descanso-info') { await closeTag('descanso-info'); await closeTag('rest-live'); }
+    if (FN) {
+      try {
+        await fetch(FN, { method: 'POST', body: JSON.stringify({ acao: 'recebido', id: opts.data.id, tag, ok, erro, v: VERSION, decl: !!d.web_push }) });
+      } catch (e) { /* sem internet */ }
+    }
+  })());
 });
 self.addEventListener('notificationclick', event => {
   event.notification.close();

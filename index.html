@@ -1354,7 +1354,28 @@ const pushSupported = () => !!VAPID && 'serviceWorker' in navigator && 'PushMana
 const pushDisponivel = () => !!VAPID && isCloud() && !!state.user;
 const pushAtivo = () => notifState() === 'granted' && !!LS.get('push:ep', null);
 const pushOn = () => pushDisponivel() && state.settings.aviso === 'push' && pushAtivo();
-const restPush = { id: null };
+const restPush = { id: null, infoEnd: 0 };
+const APP_VERSION = 'axis-v11';
+let swCheckAt = 0;
+function swAtualizar() {
+  if (!('serviceWorker' in navigator) || Date.now() - swCheckAt < 5 * 60e3) return;
+  swCheckAt = Date.now();
+  navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => {});
+  swVersao().then(v => { if (v !== state.swV) { state.swV = v; if (state.view === 'ficha' || state.view === 'conta') renderView(); } });
+}
+function swVersao() {
+  return new Promise(res => {
+    const c = 'serviceWorker' in navigator && navigator.serviceWorker.controller; if (!c) return res(null);
+    const ch = new MessageChannel(), t = setTimeout(() => res(null), 1500);
+    ch.port1.onmessage = e => { clearTimeout(t); res(e.data || null); };
+    try { c.postMessage({ type: 'versao' }, [ch.port2]); } catch (e) { clearTimeout(t); res(null); }
+  });
+}
+let diagEnviado = false;
+function pushDiag() {
+  if (diagEnviado || !pushOn()) return; diagEnviado = true;
+  swVersao().then(sw => api.diagAviso({ v: APP_VERSION, sw: sw || 'nenhum', ua: navigator.userAgent, standalone: isStandalone(), perm: notifState() }));
+}
 function pushHint() {
   if (!pushSupported()) {
     if (isIOS() && !isStandalone()) return 'No iPhone, a notificação só funciona com o app aberto pelo ícone da tela inicial.';
@@ -1383,7 +1404,7 @@ async function pushAtivar(silencioso) {
   LS.set('push:ep', j.endpoint);
   return true;
 }
-function pushRefresh() { if (state.settings.aviso === 'push' && pushSupported() && notifState() === 'granted' && state.user) pushAtivar(true).catch(() => {}); }
+function pushRefresh() { if (state.settings.aviso === 'push' && pushSupported() && notifState() === 'granted' && state.user) pushAtivar(true).then(pushDiag).catch(() => {}); }
 function pushErro(e) {
   const m = e && e.message;
   if (m === 'sem-permissao') return pushHint() || 'Sem permissão para notificações. Toque em Ativar e escolha Permitir.';
@@ -1402,14 +1423,26 @@ function avisoAgendar() {
 }
 function avisoCancelar() { const id = restPush.id; if (!id) return; restPush.id = null; api.cancelarAviso(id).catch(() => {}); }
 function avisoAoSair() {
-  if (!pushOn() || !restActive() || restPush.id) return;
+  if (!pushOn() || !restActive()) return;
   const seg = (timer.end - Date.now()) / 1000; if (seg < 0.5) return;
-  const row = avisoRow(seg); restPush.id = api.beaconAviso(row) ? row.id : null;
+  if (!restPush.id) { const row = avisoRow(seg); restPush.id = api.beaconAviso(row) ? row.id : null; }
+  // Fora do app não dá para mostrar o cronômetro correndo; mostramos a hora em que o descanso acaba.
+  if (state.settings.avisoInfo !== false && seg > 8 && restPush.infoEnd !== timer.end) {
+    const t = state.draft ? treinoById(state.draft.treino) : null;
+    const ok = api.beaconAviso({ id: uuid(), endpoint: LS.get('push:ep', null), espera_s: 0, titulo: 'Descansando', corpo: `Próxima série às ${hhmmss(timer.end)}${t ? ` · Treino ${t.id}` : ''}`, tag: 'descanso-info' });
+    if (ok) restPush.infoEnd = timer.end;
+  }
 }
 function pushCard() {
-  if (pushAtivo()) return `<div class="ntfy stack"><p class="small"><b>Ativado neste celular.</b> Quando o descanso acabar, chega uma notificação com som, mesmo com o app fechado ou o celular bloqueado.</p>
+  if (pushAtivo()) {
+    const velho = state.swV && state.swV !== APP_VERSION, sem = !state.swV && 'serviceWorker' in navigator;
+    return `<div class="ntfy stack"><p class="small"><b>Ativado neste celular.</b> Quando o descanso acabar, chega uma notificação com som, mesmo com o app fechado ou o celular bloqueado.</p>
+    <label class="toggle" for="s-info"><input type="checkbox" id="s-info"${state.settings.avisoInfo !== false ? ' checked' : ''}> Ao sair do app no descanso, mostrar a hora em que ele acaba</label>
     <button type="button" class="btn sm primary" data-action="push-teste" style="align-self:flex-start">Enviar teste</button>
-    <p class="small muted">No teste, bloqueie o celular logo depois de tocar: a notificação chega em uns 5 segundos.</p></div>`;
+    <p class="small muted">No teste, bloqueie o celular logo depois de tocar: a notificação chega em uns 5 segundos. Se não chegar, confira em Ajustes do celular → Notificações → ÁXIS se estão ligados "Permitir", "Sons" e "Tela Bloqueada", e se nenhum modo Foco está ativo.</p>
+    ${velho || sem ? `<p class="small" style="color:var(--bad)">O app ainda está terminando de atualizar. Feche o ÁXIS (deslize ele para cima na lista de apps abertos) e abra de novo.</p>` : ''}
+    <p class="small muted">Versão ${APP_VERSION}${state.swV ? ` · serviço ${esc(state.swV)}` : ''}</p></div>`;
+  }
   const h = pushHint();
   return `<div class="ntfy stack">${h ? `<p class="small">${esc(h)}</p>` : `<p class="small">Toque em ativar e escolha <b>Permitir</b> quando o celular perguntar.</p><button type="button" class="btn sm primary" data-action="push-ativar" style="align-self:flex-start">Ativar notificações</button>`}</div>`;
 }
@@ -1434,6 +1467,7 @@ document.addEventListener('visibilitychange', () => {
   syncWakeLock();
   if (document.visibilityState === 'visible') {
     swPost({ type: 'rest-fg' });
+    swAtualizar();
     ntfyCancel();
     if (!$('#timer').hidden) tick();
   } else if (pushOn() && restActive()) {
@@ -1868,6 +1902,7 @@ const api = window.AXIS_TEST_API || {
   agendarAviso: async row => must(await sb.from('avisos').insert(row)),
   cancelarAviso: async id => must(await sb.from('avisos').delete().eq('id', id)),
   // Ao sair da tela: sendBeacon (texto simples) chega mesmo com o app sendo pausado
+  diagAviso: d => { try { return !!FN_DESCANSO && navigator.sendBeacon(FN_DESCANSO, new Blob([JSON.stringify(Object.assign({ acao: 'diag' }, d))], { type: 'text/plain' })); } catch (e) { return false; } },
   beaconAviso: row => {
     const tok = authToken(); if (!tok || !FN_DESCANSO || !navigator.sendBeacon) return false;
     try { return navigator.sendBeacon(FN_DESCANSO, new Blob([JSON.stringify({ acao: 'agendar', token: tok, aviso: row })], { type: 'text/plain' })); } catch (e) { return false; }
@@ -3130,6 +3165,7 @@ document.addEventListener('change', async e => {
     state.settings.aviso = v; state.settings.notif = v === 'nav';
     LS.set('settings', state.settings); render(); return;
   }
+  if (el.id === 's-info') { state.settings.avisoInfo = el.checked; LS.set('settings', state.settings); return; }
   if (el.id === 's-tela') { state.settings.telaLigada = el.checked; LS.set('settings', state.settings); syncWakeLock(); return; }
   if (el.id === 's-step') { state.settings.step = +el.value; LS.set('settings', state.settings); return; }
   if ((el.id === 'v-cam' || el.id === 'v-file') && el.files && el.files[0]) { const f = el.files[0]; el.value = ''; saveVideoFile(f); return; }
@@ -3179,6 +3215,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 ntfyCancel();
 VDB.keys().then(ks => { if (ks && ks.length) { state.vids = new Set(ks); render(); } }).catch(() => {});
 if (window.AXIS_TEST_API) window.__axis = { state, timer, startTimer, stopTimer };
+swAtualizar();
 if (CLOUD_ON) { bootCloud(); initStore(); }
 else {
   readHash();
